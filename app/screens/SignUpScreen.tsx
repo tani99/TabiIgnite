@@ -1,4 +1,4 @@
-import { ComponentType, FC, useEffect, useMemo, useRef, useState } from "react"
+import { ComponentType, FC, useMemo, useRef, useState } from "react"
 // eslint-disable-next-line no-restricted-imports
 import { TextInput, TextStyle, ViewStyle } from "react-native"
 import { useNavigation } from "@react-navigation/native"
@@ -13,48 +13,52 @@ import type { AppStackScreenProps } from "@/navigators/AppNavigator"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
-interface LoginScreenProps extends AppStackScreenProps<"Login"> {}
+interface SignUpScreenProps extends AppStackScreenProps<"SignUp"> {}
 
-export const LoginScreen: FC<LoginScreenProps> = () => {
+export const SignUpScreen: FC<SignUpScreenProps> = () => {
   const navigation = useNavigation()
   const authPasswordInput = useRef<TextInput>(null)
+  const authConfirmPasswordInput = useRef<TextInput>(null)
 
+  const [authEmail, setAuthEmail] = useState("")
   const [authPassword, setAuthPassword] = useState("")
+  const [authConfirmPassword, setAuthConfirmPassword] = useState("")
   const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState(true)
+  const [isAuthConfirmPasswordHidden, setIsAuthConfirmPasswordHidden] = useState(true)
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [attemptsCount, setAttemptsCount] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [firebaseError, setFirebaseError] = useState("")
-  const { authEmail, setAuthEmail, setAuthToken, validationError } = useAuth()
+  const { setAuthEmail: setAuthEmailContext, setAuthToken, validationError } = useAuth()
 
   const {
     themed,
     theme: { colors },
   } = useAppTheme()
 
-  // Remove hardcoded credentials from useEffect
-  useEffect(() => {
-    // Firebase authentication will be implemented in Phase 2
-    // No pre-filling of credentials for security
-  }, [])
+  const confirmPasswordError = useMemo(() => {
+    if (!isSubmitted) return ""
+    if (!authConfirmPassword) return "can't be blank"
+    if (authConfirmPassword !== authPassword) return "passwords don't match"
+    return ""
+  }, [isSubmitted, authConfirmPassword, authPassword])
 
-  const error = isSubmitted ? validationError || firebaseError : ""
+  const error = isSubmitted ? validationError || firebaseError || confirmPasswordError : ""
 
-  function login() {
+  function signUp() {
     setIsSubmitted(true)
-    setAttemptsCount(attemptsCount + 1)
     setFirebaseError("")
 
-    if (validationError) return
+    if (validationError || confirmPasswordError) return
 
-    // TODO: Replace with Firebase signInWithEmailAndPassword in Phase 2
+    // TODO: Replace with Firebase createUserWithEmailAndPassword in Phase 2
     setIsLoading(true)
 
-    // Simulate Firebase authentication delay
+    // Simulate Firebase signup delay
     setTimeout(() => {
       setIsLoading(false)
       setIsSubmitted(false)
       setAuthPassword("")
+      setAuthConfirmPassword("")
       setAuthEmail("")
 
       // We'll mock this with a fake token for now
@@ -78,28 +82,49 @@ export const LoginScreen: FC<LoginScreenProps> = () => {
     [isAuthPasswordHidden, colors.palette.neutral800],
   )
 
+  const ConfirmPasswordRightAccessory: ComponentType<TextFieldAccessoryProps> = useMemo(
+    () =>
+      function ConfirmPasswordRightAccessory(props: TextFieldAccessoryProps) {
+        return (
+          <PressableIcon
+            icon={isAuthConfirmPasswordHidden ? "view" : "hidden"}
+            color={colors.palette.neutral800}
+            containerStyle={props.style}
+            size={20}
+            onPress={() => setIsAuthConfirmPasswordHidden(!isAuthConfirmPasswordHidden)}
+          />
+        )
+      },
+    [isAuthConfirmPasswordHidden, colors.palette.neutral800],
+  )
+
   return (
     <Screen
       preset="auto"
       contentContainerStyle={themed($screenContentContainer)}
       safeAreaEdges={["top", "bottom"]}
     >
-      <Text testID="login-heading" tx="loginScreen:logIn" preset="heading" style={themed($logIn)} />
-      <Text tx="loginScreen:enterDetails" preset="subheading" style={themed($enterDetails)} />
-      {attemptsCount > 2 && (
-        <Text tx="loginScreen:hint" size="sm" weight="light" style={themed($hint)} />
-      )}
+      <Text
+        testID="signup-heading"
+        tx="signUpScreen:signUp"
+        preset="heading"
+        style={themed($signUp)}
+      />
+      <Text tx="signUpScreen:enterDetails" preset="subheading" style={themed($enterDetails)} />
 
       <TextField
         value={authEmail}
-        onChangeText={setAuthEmail}
+        onChangeText={(text) => {
+          setAuthEmail(text)
+          setAuthEmailContext(text)
+        }}
         containerStyle={themed($textField)}
         autoCapitalize="none"
         autoComplete="email"
         autoCorrect={false}
         keyboardType="email-address"
-        labelTx="loginScreen:emailFieldLabel"
-        placeholderTx="loginScreen:emailFieldPlaceholder"
+        labelTx="signUpScreen:emailFieldLabel"
+        placeholderTx="signUpScreen:emailFieldPlaceholder"
         helper={error}
         status={error ? "error" : undefined}
         onSubmitEditing={() => authPasswordInput.current?.focus()}
@@ -115,37 +140,46 @@ export const LoginScreen: FC<LoginScreenProps> = () => {
         autoComplete="password"
         autoCorrect={false}
         secureTextEntry={isAuthPasswordHidden}
-        labelTx="loginScreen:passwordFieldLabel"
-        placeholderTx="loginScreen:passwordFieldPlaceholder"
-        onSubmitEditing={login}
+        labelTx="signUpScreen:passwordFieldLabel"
+        placeholderTx="signUpScreen:passwordFieldPlaceholder"
+        onSubmitEditing={() => authConfirmPasswordInput.current?.focus()}
         RightAccessory={PasswordRightAccessory}
         editable={!isLoading}
       />
 
+      <TextField
+        ref={authConfirmPasswordInput}
+        value={authConfirmPassword}
+        onChangeText={setAuthConfirmPassword}
+        containerStyle={themed($textField)}
+        autoCapitalize="none"
+        autoComplete="password"
+        autoCorrect={false}
+        secureTextEntry={isAuthConfirmPasswordHidden}
+        labelTx="signUpScreen:confirmPasswordFieldLabel"
+        placeholderTx="signUpScreen:confirmPasswordFieldPlaceholder"
+        onSubmitEditing={signUp}
+        RightAccessory={ConfirmPasswordRightAccessory}
+        editable={!isLoading}
+      />
+
       <Button
-        testID="login-button"
-        tx={isLoading ? "loginScreen:loggingIn" : "loginScreen:tapToLogIn"}
+        testID="signup-button"
+        tx={isLoading ? "signUpScreen:signingUp" : "signUpScreen:tapToSignUp"}
         style={themed($tapButton)}
         preset="reversed"
-        onPress={login}
+        onPress={signUp}
         disabled={isLoading}
       />
 
-      {/* Sign Up and Forgot Password Links */}
+      {/* Back to Login Link */}
       <Text style={themed($linksContainer)}>
+        <Text tx="signUpScreen:alreadyHaveAccount" style={themed($text)} />
         <Text
-          tx="loginScreen:signUpLink"
+          tx="signUpScreen:logInLink"
           style={themed($link)}
           onPress={() => {
-            navigation.navigate("SignUp" as never)
-          }}
-        />
-        <Text tx="loginScreen:separator" style={themed($separator)} />
-        <Text
-          tx="loginScreen:forgotPasswordLink"
-          style={themed($link)}
-          onPress={() => {
-            navigation.navigate("ForgotPassword" as never)
+            navigation.navigate("Login" as never)
           }}
         />
       </Text>
@@ -158,17 +192,12 @@ const $screenContentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.lg,
 })
 
-const $logIn: ThemedStyle<TextStyle> = ({ spacing }) => ({
+const $signUp: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.sm,
 })
 
 const $enterDetails: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.lg,
-})
-
-const $hint: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
-  color: colors.tint,
-  marginBottom: spacing.md,
 })
 
 const $textField: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -184,12 +213,12 @@ const $linksContainer: ThemedStyle<TextStyle> = ({ spacing }) => ({
   textAlign: "center",
 })
 
+const $text: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.palette.neutral600,
+})
+
 const $link: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.tint,
   textDecorationLine: "underline",
-})
-
-const $separator: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
-  color: colors.palette.neutral600,
-  marginHorizontal: spacing.sm,
+  marginLeft: 4,
 })

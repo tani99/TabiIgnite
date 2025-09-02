@@ -12,9 +12,11 @@ import {
 import { Link, RouteProp, useRoute } from "@react-navigation/native"
 import { Drawer } from "react-native-drawer-layout"
 
+import { Button } from "@/components/Button"
 import { ListItem } from "@/components/ListItem"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
+import { useAuth } from "@/context/AuthContext"
 import { TxKeyPath, isRTL } from "@/i18n"
 import { translate } from "@/i18n/translate"
 import { DemoTabParamList, DemoTabScreenProps } from "@/navigators/DemoNavigator"
@@ -115,6 +117,7 @@ export const DemoShowroomScreen: FC<DemoTabScreenProps<"DemoShowroom">> =
     const params = route.params
 
     const { themed, theme } = useAppTheme()
+    const { logout } = useAuth()
 
     const toggleDrawer = useCallback(() => {
       if (!open) {
@@ -219,6 +222,16 @@ export const DemoShowroomScreen: FC<DemoTabScreenProps<"DemoShowroom">> =
                 <ShowroomListItem {...{ item, sectionIndex, handleScroll }} />
               )}
             />
+
+            {/* Logout Button at bottom of drawer */}
+            <View style={themed($logoutContainer)}>
+              <Button
+                tx="common:logOut"
+                onPress={logout}
+                preset="reversed"
+                style={themed($logoutButton)}
+              />
+            </View>
           </View>
         )}
       >
@@ -314,4 +327,16 @@ const $demoItemDescription: ThemedStyle<TextStyle> = ({ spacing }) => ({
 
 const $demoUseCasesSpacer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingBottom: spacing.xxl,
+})
+
+const $logoutContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingHorizontal: spacing.lg,
+  paddingBottom: spacing.lg,
+  borderTopWidth: 1,
+  borderTopColor: "rgba(0,0,0,0.1)",
+  paddingTop: spacing.md,
+})
+
+const $logoutButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginTop: spacing.sm,
 })

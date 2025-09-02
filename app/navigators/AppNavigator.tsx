@@ -11,7 +11,9 @@ import { createNativeStackNavigator, NativeStackScreenProps } from "@react-navig
 import Config from "@/config"
 import { useAuth } from "@/context/AuthContext"
 import { ErrorBoundary } from "@/screens/ErrorScreen/ErrorBoundary"
+import { ForgotPasswordScreen } from "@/screens/ForgotPasswordScreen"
 import { LoginScreen } from "@/screens/LoginScreen"
+import { SignUpScreen } from "@/screens/SignUpScreen"
 import { WelcomeScreen } from "@/screens/WelcomeScreen"
 import { useAppTheme } from "@/theme/context"
 
@@ -30,6 +32,8 @@ import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
 export type AppStackParamList = {
   Welcome: undefined
   Login: undefined
+  SignUp: undefined
+  ForgotPassword: undefined
   Demo: NavigatorScreenParams<DemoTabParamList>
   // 🔥 Your screens go here
   // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
@@ -58,6 +62,7 @@ const AppStack = () => {
 
   return (
     <Stack.Navigator
+      key={isAuthenticated ? "authenticated" : "unauthenticated"}
       screenOptions={{
         headerShown: false,
         navigationBarColor: colors.background,
@@ -76,6 +81,8 @@ const AppStack = () => {
       ) : (
         <>
           <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="SignUp" component={SignUpScreen} />
+          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
         </>
       )}
 
