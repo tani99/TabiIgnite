@@ -1,14 +1,35 @@
-import { createContext, FC, PropsWithChildren, useCallback, useContext, useMemo } from "react"
-import { useMMKVString } from "react-native-mmkv"
+import {
+  createContext,
+  FC,
+  PropsWithChildren,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react"
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail,
+  User,
+} from "firebase/auth"
+
+import { auth } from "@/config/firebase"
 
 export type AuthContextType = {
   isAuthenticated: boolean
-  authToken?: string
+  user: User | null
   authEmail?: string
-  setAuthToken: (token?: string) => void
   setAuthEmail: (email: string) => void
-  logout: () => void
+  login: (email: string, password: string) => Promise<void>
+  signUp: (email: string, password: string) => Promise<void>
+  logout: () => Promise<void>
+  resetPassword: (email: string) => Promise<void>
   validationError: string
+  isLoading: boolean
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null)
@@ -16,13 +37,64 @@ export const AuthContext = createContext<AuthContextType | null>(null)
 export interface AuthProviderProps {}
 
 export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ children }) => {
-  const [authToken, setAuthToken] = useMMKVString("AuthProvider.authToken")
-  const [authEmail, setAuthEmail] = useMMKVString("AuthProvider.authEmail")
+  const [user, setUser] = useState<User | null>(null)
+  const [authEmail, setAuthEmail] = useState("")
+  const [isLoading, setIsLoading] = useState(true)
 
-  const logout = useCallback(() => {
-    setAuthToken(undefined)
-    setAuthEmail("")
-  }, [setAuthEmail, setAuthToken])
+  // Listen for Firebase auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user)
+      setIsLoading(false)
+    })
+
+    return () => unsubscribe()
+  }, [])
+
+  const login = useCallback(async (email: string, password: string) => {
+    try {
+      setIsLoading(true)
+      await signInWithEmailAndPassword(auth, email, password)
+    } catch (error) {
+      throw error
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  const signUp = useCallback(async (email: string, password: string) => {
+    try {
+      setIsLoading(true)
+      await createUserWithEmailAndPassword(auth, email, password)
+    } catch (error) {
+      throw error
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  const logout = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      await signOut(auth)
+      setAuthEmail("")
+    } catch (error) {
+      throw error
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  const resetPassword = useCallback(async (email: string) => {
+    try {
+      setIsLoading(true)
+      await sendPasswordResetEmail(auth, email)
+    } catch (error) {
+      throw error
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
 
   const validationError = useMemo(() => {
     if (!authEmail || authEmail.length === 0) return "can't be blank"
@@ -32,13 +104,16 @@ export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ childre
   }, [authEmail])
 
   const value = {
-    isAuthenticated: !!authToken,
-    authToken,
+    isAuthenticated: !!user,
+    user,
     authEmail,
-    setAuthToken,
     setAuthEmail,
+    login,
+    signUp,
     logout,
+    resetPassword,
     validationError,
+    isLoading,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

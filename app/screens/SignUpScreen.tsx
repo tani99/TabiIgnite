@@ -28,7 +28,7 @@ export const SignUpScreen: FC<SignUpScreenProps> = () => {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [firebaseError, setFirebaseError] = useState("")
-  const { setAuthEmail: setAuthEmailContext, setAuthToken, validationError } = useAuth()
+  const { setAuthEmail: setAuthEmailContext, signUp, validationError } = useAuth()
 
   const {
     themed,
@@ -44,26 +44,40 @@ export const SignUpScreen: FC<SignUpScreenProps> = () => {
 
   const error = isSubmitted ? validationError || firebaseError || confirmPasswordError : ""
 
-  function signUp() {
+  async function handleSignUp() {
     setIsSubmitted(true)
     setFirebaseError("")
 
     if (validationError || confirmPasswordError) return
 
-    // TODO: Replace with Firebase createUserWithEmailAndPassword in Phase 2
-    setIsLoading(true)
+    try {
+      setIsLoading(true)
+      if (authEmail && authPassword) {
+        await signUp(authEmail, authPassword)
+      }
 
-    // Simulate Firebase signup delay
-    setTimeout(() => {
-      setIsLoading(false)
+      // Clear form on successful signup
       setIsSubmitted(false)
       setAuthPassword("")
       setAuthConfirmPassword("")
       setAuthEmail("")
+    } catch (error: any) {
+      setIsLoading(false)
+      setIsSubmitted(false)
 
-      // We'll mock this with a fake token for now
-      setAuthToken(String(Date.now()))
-    }, 1000)
+      // Handle Firebase auth errors
+      if (error.code === "auth/email-already-in-use") {
+        setFirebaseError("An account with this email already exists")
+      } else if (error.code === "auth/invalid-email") {
+        setFirebaseError("Invalid email address")
+      } else if (error.code === "auth/weak-password") {
+        setFirebaseError("Password is too weak. Use at least 6 characters")
+      } else if (error.code === "auth/network-request-failed") {
+        setFirebaseError("Network error. Please check your connection")
+      } else {
+        setFirebaseError("Sign up failed. Please try again")
+      }
+    }
   }
 
   const PasswordRightAccessory: ComponentType<TextFieldAccessoryProps> = useMemo(
@@ -158,7 +172,7 @@ export const SignUpScreen: FC<SignUpScreenProps> = () => {
         secureTextEntry={isAuthConfirmPasswordHidden}
         labelTx="signUpScreen:confirmPasswordFieldLabel"
         placeholderTx="signUpScreen:confirmPasswordFieldPlaceholder"
-        onSubmitEditing={signUp}
+        onSubmitEditing={handleSignUp}
         RightAccessory={ConfirmPasswordRightAccessory}
         editable={!isLoading}
       />
@@ -168,7 +182,7 @@ export const SignUpScreen: FC<SignUpScreenProps> = () => {
         tx={isLoading ? "signUpScreen:signingUp" : "signUpScreen:tapToSignUp"}
         style={themed($tapButton)}
         preset="reversed"
-        onPress={signUp}
+        onPress={handleSignUp}
         disabled={isLoading}
       />
 

@@ -25,7 +25,7 @@ export const LoginScreen: FC<LoginScreenProps> = () => {
   const [attemptsCount, setAttemptsCount] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [firebaseError, setFirebaseError] = useState("")
-  const { authEmail, setAuthEmail, setAuthToken, validationError } = useAuth()
+  const { authEmail, setAuthEmail, login, validationError } = useAuth()
 
   const {
     themed,
@@ -40,26 +40,42 @@ export const LoginScreen: FC<LoginScreenProps> = () => {
 
   const error = isSubmitted ? validationError || firebaseError : ""
 
-  function login() {
+  async function handleLogin() {
     setIsSubmitted(true)
     setAttemptsCount(attemptsCount + 1)
     setFirebaseError("")
 
     if (validationError) return
 
-    // TODO: Replace with Firebase signInWithEmailAndPassword in Phase 2
-    setIsLoading(true)
+    try {
+      setIsLoading(true)
+      if (authEmail && authPassword) {
+        await login(authEmail, authPassword)
+      }
 
-    // Simulate Firebase authentication delay
-    setTimeout(() => {
-      setIsLoading(false)
+      // Clear form on successful login
       setIsSubmitted(false)
       setAuthPassword("")
       setAuthEmail("")
+    } catch (error: any) {
+      setIsLoading(false)
+      setIsSubmitted(false)
 
-      // We'll mock this with a fake token for now
-      setAuthToken(String(Date.now()))
-    }, 1000)
+      // Handle Firebase auth errors
+      if (error.code === "auth/user-not-found") {
+        setFirebaseError("No account found with this email address")
+      } else if (error.code === "auth/wrong-password") {
+        setFirebaseError("Incorrect password")
+      } else if (error.code === "auth/invalid-email") {
+        setFirebaseError("Invalid email address")
+      } else if (error.code === "auth/too-many-requests") {
+        setFirebaseError("Too many failed attempts. Please try again later")
+      } else if (error.code === "auth/network-request-failed") {
+        setFirebaseError("Network error. Please check your connection")
+      } else {
+        setFirebaseError("Login failed. Please try again")
+      }
+    }
   }
 
   const PasswordRightAccessory: ComponentType<TextFieldAccessoryProps> = useMemo(
@@ -117,7 +133,7 @@ export const LoginScreen: FC<LoginScreenProps> = () => {
         secureTextEntry={isAuthPasswordHidden}
         labelTx="loginScreen:passwordFieldLabel"
         placeholderTx="loginScreen:passwordFieldPlaceholder"
-        onSubmitEditing={login}
+        onSubmitEditing={handleLogin}
         RightAccessory={PasswordRightAccessory}
         editable={!isLoading}
       />
@@ -127,7 +143,7 @@ export const LoginScreen: FC<LoginScreenProps> = () => {
         tx={isLoading ? "loginScreen:loggingIn" : "loginScreen:tapToLogIn"}
         style={themed($tapButton)}
         preset="reversed"
-        onPress={login}
+        onPress={handleLogin}
         disabled={isLoading}
       />
 

@@ -20,25 +20,30 @@ export const ForgotPasswordScreen: FC<ForgotPasswordScreenProps> = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [firebaseError, setFirebaseError] = useState("")
   const [isSuccess, setIsSuccess] = useState(false)
-  const { setAuthEmail: setAuthEmailContext, validationError } = useAuth()
+  const {
+    setAuthEmail: setAuthEmailContext,
+    resetPassword: resetPasswordAuth,
+    validationError,
+  } = useAuth()
 
   const { themed } = useAppTheme()
 
   const error = isSubmitted ? validationError || firebaseError : ""
 
-  function resetPassword() {
+  async function handleResetPassword() {
     setIsSubmitted(true)
     setFirebaseError("")
     setIsSuccess(false)
 
     if (validationError) return
 
-    // TODO: Replace with Firebase sendPasswordResetEmail in Phase 2
-    setIsLoading(true)
+    try {
+      setIsLoading(true)
+      if (authEmail) {
+        await resetPasswordAuth(authEmail)
+      }
 
-    // Simulate Firebase password reset delay
-    setTimeout(() => {
-      setIsLoading(false)
+      // Clear form and show success on successful password reset
       setIsSubmitted(false)
       setAuthEmail("")
       setIsSuccess(true)
@@ -47,7 +52,23 @@ export const ForgotPasswordScreen: FC<ForgotPasswordScreenProps> = () => {
       setTimeout(() => {
         setIsSuccess(false)
       }, 3000)
-    }, 1000)
+    } catch (error: any) {
+      setIsLoading(false)
+      setIsSubmitted(false)
+
+      // Handle Firebase auth errors
+      if (error.code === "auth/user-not-found") {
+        setFirebaseError("No account found with this email address")
+      } else if (error.code === "auth/invalid-email") {
+        setFirebaseError("Invalid email address")
+      } else if (error.code === "auth/network-request-failed") {
+        setFirebaseError("Network error. Please check your connection")
+      } else if (error.code === "auth/too-many-requests") {
+        setFirebaseError("Too many requests. Please try again later")
+      } else {
+        setFirebaseError("Password reset failed. Please try again")
+      }
+    }
   }
 
   return (
@@ -91,7 +112,7 @@ export const ForgotPasswordScreen: FC<ForgotPasswordScreenProps> = () => {
         placeholderTx="forgotPasswordScreen:emailFieldPlaceholder"
         helper={error}
         status={error ? "error" : undefined}
-        onSubmitEditing={resetPassword}
+        onSubmitEditing={handleResetPassword}
         editable={!isLoading}
       />
 
@@ -104,7 +125,7 @@ export const ForgotPasswordScreen: FC<ForgotPasswordScreenProps> = () => {
         }
         style={themed($tapButton)}
         preset="reversed"
-        onPress={resetPassword}
+        onPress={handleResetPassword}
         disabled={isLoading}
       />
 
