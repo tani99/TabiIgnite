@@ -21,6 +21,8 @@ export const LoginScreen: FC<LoginScreenProps> = () => {
   const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState(true)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [attemptsCount, setAttemptsCount] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
+  const [firebaseError, setFirebaseError] = useState("")
   const { authEmail, setAuthEmail, setAuthToken, validationError } = useAuth()
 
   const {
@@ -28,29 +30,34 @@ export const LoginScreen: FC<LoginScreenProps> = () => {
     theme: { colors },
   } = useAppTheme()
 
+  // Remove hardcoded credentials from useEffect
   useEffect(() => {
-    // Here is where you could fetch credentials from keychain or storage
-    // and pre-fill the form fields.
-    setAuthEmail("ignite@infinite.red")
-    setAuthPassword("ign1teIsAwes0m3")
-  }, [setAuthEmail])
+    // Firebase authentication will be implemented in Phase 2
+    // No pre-filling of credentials for security
+  }, [])
 
-  const error = isSubmitted ? validationError : ""
+  const error = isSubmitted ? validationError || firebaseError : ""
 
   function login() {
     setIsSubmitted(true)
     setAttemptsCount(attemptsCount + 1)
+    setFirebaseError("")
 
     if (validationError) return
 
-    // Make a request to your server to get an authentication token.
-    // If successful, reset the fields and set the token.
-    setIsSubmitted(false)
-    setAuthPassword("")
-    setAuthEmail("")
+    // TODO: Replace with Firebase signInWithEmailAndPassword in Phase 2
+    setIsLoading(true)
 
-    // We'll mock this with a fake token.
-    setAuthToken(String(Date.now()))
+    // Simulate Firebase authentication delay
+    setTimeout(() => {
+      setIsLoading(false)
+      setIsSubmitted(false)
+      setAuthPassword("")
+      setAuthEmail("")
+
+      // We'll mock this with a fake token for now
+      setAuthToken(String(Date.now()))
+    }, 1000)
   }
 
   const PasswordRightAccessory: ComponentType<TextFieldAccessoryProps> = useMemo(
@@ -94,6 +101,7 @@ export const LoginScreen: FC<LoginScreenProps> = () => {
         helper={error}
         status={error ? "error" : undefined}
         onSubmitEditing={() => authPasswordInput.current?.focus()}
+        editable={!isLoading}
       />
 
       <TextField
@@ -109,15 +117,38 @@ export const LoginScreen: FC<LoginScreenProps> = () => {
         placeholderTx="loginScreen:passwordFieldPlaceholder"
         onSubmitEditing={login}
         RightAccessory={PasswordRightAccessory}
+        editable={!isLoading}
       />
 
       <Button
         testID="login-button"
-        tx="loginScreen:tapToLogIn"
+        tx={isLoading ? "loginScreen:loggingIn" : "loginScreen:tapToLogIn"}
         style={themed($tapButton)}
         preset="reversed"
         onPress={login}
+        disabled={isLoading}
       />
+
+      {/* Sign Up and Forgot Password Links */}
+      <Text style={themed($linksContainer)}>
+        <Text
+          tx="loginScreen:signUpLink"
+          style={themed($link)}
+          onPress={() => {
+            // TODO: Navigate to SignUpScreen in Step 4
+            console.log("Navigate to SignUpScreen")
+          }}
+        />
+        <Text tx="loginScreen:separator" style={themed($separator)} />
+        <Text
+          tx="loginScreen:forgotPasswordLink"
+          style={themed($link)}
+          onPress={() => {
+            // TODO: Navigate to ForgotPasswordScreen in Step 4
+            console.log("Navigate to ForgotPasswordScreen")
+          }}
+        />
+      </Text>
     </Screen>
   )
 }
@@ -146,4 +177,19 @@ const $textField: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 
 const $tapButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginTop: spacing.xs,
+})
+
+const $linksContainer: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  marginTop: spacing.lg,
+  textAlign: "center",
+})
+
+const $link: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.tint,
+  textDecorationLine: "underline",
+})
+
+const $separator: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  color: colors.palette.neutral600,
+  marginHorizontal: spacing.sm,
 })
