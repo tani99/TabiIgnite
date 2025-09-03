@@ -1,6 +1,6 @@
-import { ComponentType, FC, useMemo, useRef, useState } from "react"
+import { ComponentType, FC, useEffect, useMemo, useRef, useState } from "react"
 // eslint-disable-next-line no-restricted-imports
-import { TextInput, TextStyle, View, ViewStyle } from "react-native"
+import { Animated, TextInput, TextStyle, View, ViewStyle, Image, ImageStyle } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 
 import { Button } from "@/components/Button"
@@ -8,7 +8,7 @@ import { PressableIcon } from "@/components/Icon"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { TextField, type TextFieldAccessoryProps } from "@/components/TextField"
-import { ThemeSwitcher } from "@/components/ThemeSwitcher"
+
 import { useAuth } from "@/context/AuthContext"
 import type { AppStackScreenProps } from "@/navigators/AppNavigator"
 import { useAppTheme } from "@/theme/context"
@@ -16,6 +16,8 @@ import type { ThemedStyle } from "@/theme/types"
 import { getErrorMessageForDisplay } from "@/utils/firebaseErrorHandler"
 
 interface SignUpScreenProps extends AppStackScreenProps<"SignUp"> {}
+
+const welcomeLogo = require("@assets/images/logo.png")
 
 export const SignUpScreen: FC<SignUpScreenProps> = () => {
   const navigation = useNavigation()
@@ -32,10 +34,31 @@ export const SignUpScreen: FC<SignUpScreenProps> = () => {
   const [firebaseError, setFirebaseError] = useState("")
   const { setAuthEmail: setAuthEmailContext, signUp, validationError } = useAuth()
 
+  // Animation values for modern entrance effects
+  const fadeAnim = useRef(new Animated.Value(0)).current
+  const slideAnim = useRef(new Animated.Value(30)).current
+
   const {
     themed,
     theme: { colors },
   } = useAppTheme()
+
+  // Modern entrance animations
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 500,
+        delay: 100,
+        useNativeDriver: true,
+      }),
+    ]).start()
+  }, [fadeAnim, slideAnim])
 
   const confirmPasswordError = useMemo(() => {
     if (!isSubmitted) return ""
@@ -120,164 +143,294 @@ export const SignUpScreen: FC<SignUpScreenProps> = () => {
       contentContainerStyle={themed($screenContentContainer)}
       safeAreaEdges={["top", "bottom"]}
     >
-      <Text
-        testID="signup-heading"
-        tx="signUpScreen:signUp"
-        preset="heading"
-        style={themed($signUp)}
-      />
-      <Text tx="signUpScreen:enterDetails" preset="subheading" style={themed($enterDetails)} />
-      
-      {/* Theme Switcher */}
-      <View style={themed($themeSwitcherContainer)}>
-        <Text style={themed($themeSwitcherLabel)} preset="formLabel" text="Theme:" />
-        <ThemeSwitcher />
-      </View>
-
-      <TextField
-        value={authEmail}
-        onChangeText={(text) => {
-          setAuthEmail(text)
-          setAuthEmailContext(text)
-          // Clear Firebase error when user starts typing
-          if (firebaseError) {
-            setFirebaseError("")
-          }
-        }}
-        containerStyle={themed($textField)}
-        autoCapitalize="none"
-        autoComplete="email"
-        autoCorrect={false}
-        keyboardType="email-address"
-        labelTx="signUpScreen:emailFieldLabel"
-        placeholderTx="signUpScreen:emailFieldPlaceholder"
-        helper={emailError}
-        status={emailError ? "error" : undefined}
-        onSubmitEditing={() => authPasswordInput.current?.focus()}
-        onBlur={() => {
-          // Clear Firebase error when field loses focus
-          if (firebaseError) {
-            setFirebaseError("")
-          }
-        }}
-        editable={!isLoading}
-      />
-
-      <TextField
-        ref={authPasswordInput}
-        value={authPassword}
-        onChangeText={(text) => {
-          setAuthPassword(text)
-          // Clear Firebase error when user starts typing password
-          if (firebaseError) {
-            setFirebaseError("")
-          }
-        }}
-        containerStyle={themed($textField)}
-        autoCapitalize="none"
-        autoComplete="password"
-        autoCorrect={false}
-        secureTextEntry={isAuthPasswordHidden}
-        labelTx="signUpScreen:passwordFieldLabel"
-        placeholderTx="signUpScreen:passwordFieldPlaceholder"
-        helper={passwordError}
-        status={passwordError ? "error" : undefined}
-        onSubmitEditing={() => authConfirmPasswordInput.current?.focus()}
-        RightAccessory={PasswordRightAccessory}
-        editable={!isLoading}
-      />
-
-      <TextField
-        ref={authConfirmPasswordInput}
-        value={authConfirmPassword}
-        onChangeText={(text) => {
-          setAuthConfirmPassword(text)
-          // Clear Firebase error when user starts typing confirm password
-          if (firebaseError) {
-            setFirebaseError("")
-          }
-        }}
-        containerStyle={themed($textField)}
-        autoCapitalize="none"
-        autoComplete="password"
-        autoCorrect={false}
-        secureTextEntry={isAuthConfirmPasswordHidden}
-        labelTx="signUpScreen:confirmPasswordFieldLabel"
-        placeholderTx="signUpScreen:confirmPasswordFieldPlaceholder"
-        helper={confirmPasswordError}
-        status={confirmPasswordError ? "error" : undefined}
-        onSubmitEditing={handleSignUp}
-        RightAccessory={ConfirmPasswordRightAccessory}
-        editable={!isLoading}
-      />
-
-      <Button
-        testID="signup-button"
-        tx={isLoading ? "signUpScreen:signingUp" : "signUpScreen:tapToSignUp"}
-        style={themed($tapButton)}
-        preset="reversed"
-        onPress={handleSignUp}
-        disabled={isLoading}
-      />
-
-      {/* Back to Login Link */}
-      <Text style={themed($linksContainer)}>
-        <Text tx="signUpScreen:alreadyHaveAccount" style={themed($text)} />
-        <Text
-          tx="signUpScreen:logInLink"
-          style={themed($link)}
-          onPress={() => {
-            navigation.navigate("Login" as never)
-          }}
+      {/* Modern Header Section */}
+      <Animated.View
+        style={[
+          themed($headerSection),
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
+      >
+        <View style={themed($logoContainer)}>
+          <Image 
+            style={themed($logo)} 
+            source={welcomeLogo} 
+            resizeMode="contain" 
+          />
+        </View>
+        <Text 
+          testID="signup-heading" 
+          tx="signUpScreen:signUp" 
+          preset="heading" 
+          size="xxl"
+          weight="bold"
+          style={themed($welcomeTitle)} 
         />
-      </Text>
+        <Text 
+          tx="signUpScreen:enterDetails" 
+          preset="subheading" 
+          style={themed($welcomeSubtitle)} 
+        />
+      </Animated.View>
+
+      {/* Modern Sign Up Card */}
+      <Animated.View
+        style={[
+          {
+            opacity: fadeAnim,
+            transform: [
+              {
+                translateY: slideAnim.interpolate({
+                  inputRange: [0, 30],
+                  outputRange: [0, 20],
+                }),
+              },
+            ],
+          },
+        ]}
+      >
+        <View style={themed($signUpContainer)}>
+          {/* Security Indicator */}
+          <View style={themed($securityIndicator)}>
+            <View style={themed($securityBadge)}>
+              <Text preset="formLabel" size="xs" style={themed($securityText)}>
+                🛡️ Secure Registration
+              </Text>
+            </View>
+          </View>
 
 
+
+          {/* Sign Up Form */}
+          <View style={themed($formContainer)}>
+            <TextField
+              value={authEmail}
+              onChangeText={(text) => {
+                setAuthEmail(text)
+                setAuthEmailContext(text)
+                if (firebaseError) {
+                  setFirebaseError("")
+                }
+              }}
+              containerStyle={themed($textField)}
+              variant="filled"
+              autoCapitalize="none"
+              autoComplete="email"
+              autoCorrect={false}
+              keyboardType="email-address"
+              labelTx="signUpScreen:emailFieldLabel"
+              placeholderTx="signUpScreen:emailFieldPlaceholder"
+              helper={emailError}
+              status={emailError ? "error" : undefined}
+              onSubmitEditing={() => authPasswordInput.current?.focus()}
+              onBlur={() => {
+                if (firebaseError) {
+                  setFirebaseError("")
+                }
+              }}
+              editable={!isLoading}
+            />
+
+            <TextField
+              ref={authPasswordInput}
+              value={authPassword}
+              onChangeText={(text) => {
+                setAuthPassword(text)
+                if (firebaseError) {
+                  setFirebaseError("")
+                }
+              }}
+              containerStyle={themed($textField)}
+              variant="filled"
+              autoCapitalize="none"
+              autoComplete="password"
+              autoCorrect={false}
+              secureTextEntry={isAuthPasswordHidden}
+              labelTx="signUpScreen:passwordFieldLabel"
+              placeholderTx="signUpScreen:passwordFieldPlaceholder"
+              helper={passwordError}
+              status={passwordError ? "error" : undefined}
+              onSubmitEditing={() => authConfirmPasswordInput.current?.focus()}
+              RightAccessory={PasswordRightAccessory}
+              editable={!isLoading}
+            />
+
+            <TextField
+              ref={authConfirmPasswordInput}
+              value={authConfirmPassword}
+              onChangeText={(text) => {
+                setAuthConfirmPassword(text)
+                if (firebaseError) {
+                  setFirebaseError("")
+                }
+              }}
+              containerStyle={themed($textField)}
+              variant="filled"
+              autoCapitalize="none"
+              autoComplete="password"
+              autoCorrect={false}
+              secureTextEntry={isAuthConfirmPasswordHidden}
+              labelTx="signUpScreen:confirmPasswordFieldLabel"
+              placeholderTx="signUpScreen:confirmPasswordFieldPlaceholder"
+              helper={confirmPasswordError}
+              status={confirmPasswordError ? "error" : undefined}
+              onSubmitEditing={handleSignUp}
+              RightAccessory={ConfirmPasswordRightAccessory}
+              editable={!isLoading}
+            />
+
+            {/* Primary CTA Button */}
+            <Button
+              testID="signup-button"
+              tx={isLoading ? "signUpScreen:signingUp" : "signUpScreen:tapToSignUp"}
+              style={themed($primaryButton)}
+              preset="primary"
+              size="lg"
+              loading={isLoading}
+              onPress={handleSignUp}
+              disabled={isLoading}
+            />
+          </View>
+        </View>
+      </Animated.View>
+
+      {/* Modern Navigation Links */}
+      <Animated.View
+        style={[
+          themed($navigationSection),
+          {
+            opacity: fadeAnim,
+          },
+        ]}
+      >
+        <View style={themed($linksContainer)}>
+          <Text tx="signUpScreen:alreadyHaveAccount" style={themed($linkText)} />
+          <Button
+            tx="signUpScreen:logInLink"
+            preset="ghost"
+            size="sm"
+            onPress={() => navigation.navigate("Login" as never)}
+            style={themed($linkButton)}
+          />
+        </View>
+      </Animated.View>
     </Screen>
   )
 }
 
-const $screenContentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingVertical: spacing.xxl,
+// Modern Sign Up Screen Styles
+
+// Screen Container
+const $screenContentContainer: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
+  flexGrow: 1,
+  paddingVertical: spacing.lg,
+  paddingHorizontal: spacing.md,
+  backgroundColor: colors.backgroundSecondary,
+})
+
+// Header Section
+const $headerSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  alignItems: "center",
+  paddingVertical: spacing.xl,
   paddingHorizontal: spacing.lg,
 })
 
-const $signUp: ThemedStyle<TextStyle> = ({ spacing }) => ({
-  marginBottom: spacing.sm,
-})
-
-const $enterDetails: ThemedStyle<TextStyle> = ({ spacing }) => ({
+// Logo Container
+const $logoContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginBottom: spacing.lg,
 })
 
-const $textField: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginBottom: spacing.lg,
+// Logo Styling
+const $logo: ThemedStyle<ImageStyle> = () => ({
+  height: 60,
+  width: 200,
 })
 
-const $tapButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginTop: spacing.xs,
-})
-
-const $linksContainer: ThemedStyle<TextStyle> = ({ spacing }) => ({
-  marginTop: spacing.lg,
+// Welcome Title
+const $welcomeTitle: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   textAlign: "center",
-})
-
-const $text: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.palette.neutral600,
-})
-
-const $link: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.tint,
-  textDecorationLine: "underline",
-  marginLeft: 4,
-})
-
-const $themeSwitcherContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginBottom: spacing.lg,
-  alignItems: "center",
-})
-
-const $themeSwitcherLabel: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  color: colors.text,
   marginBottom: spacing.sm,
+})
+
+// Welcome Subtitle
+const $welcomeSubtitle: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  textAlign: "center",
+  color: colors.textDim,
+  marginBottom: spacing.xl,
+})
+
+// Sign Up Container
+const $signUpContainer: ThemedStyle<ViewStyle> = ({ spacing, colors, elevation }) => ({
+  marginHorizontal: spacing.md,
+  marginBottom: spacing.xl,
+  backgroundColor: colors.background,
+  borderRadius: spacing.md,
+  padding: spacing.lg,
+  ...elevation.level2,
+})
+
+// Security Indicator
+const $securityIndicator: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  alignItems: "center",
+  marginBottom: spacing.lg,
+})
+
+// Security Badge
+const $securityBadge: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: colors.palette.success500 + "15", // 15% opacity
+  borderRadius: spacing.lg,
+  paddingHorizontal: spacing.sm,
+  paddingVertical: spacing.xxs,
+  borderWidth: 1,
+  borderColor: colors.palette.success500 + "30", // 30% opacity
+})
+
+// Security Text
+const $securityText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.palette.success500,
+  fontWeight: "600",
+})
+
+
+
+// Form Container
+const $formContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  gap: spacing.lg,
+})
+
+// Text Field
+const $textField: ThemedStyle<ViewStyle> = () => ({
+  // No additional margins, handled by gap in form container
+})
+
+// Primary Button
+const $primaryButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginTop: spacing.sm,
+})
+
+// Navigation Section
+const $navigationSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  alignItems: "center",
+  paddingVertical: spacing.lg,
+})
+
+// Links Container
+const $linksContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: spacing.xs,
+})
+
+// Link Text
+const $linkText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.textDim,
+})
+
+// Link Button
+const $linkButton: ThemedStyle<ViewStyle> = () => ({
+  minHeight: 36,
 })

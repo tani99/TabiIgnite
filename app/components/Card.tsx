@@ -15,13 +15,19 @@ import type { ThemedStyle, ThemedStyleArray } from "@/theme/types"
 
 import { Text, TextProps } from "./Text"
 
-type Presets = "default" | "reversed"
+type Presets = "default" | "elevated" | "outlined" | "filled" | "reversed"
+
+type Sizes = "sm" | "md" | "lg"
 
 interface CardProps extends TouchableOpacityProps {
   /**
-   * One of the different types of text presets.
+   * One of the different types of card presets.
    */
   preset?: Presets
+  /**
+   * Size variant for the card.
+   */
+  size?: Sizes
   /**
    * How the content should be aligned vertically. This is especially (but not exclusively) useful
    * when the card is a fixed height but the content is dynamic.
@@ -32,6 +38,14 @@ interface CardProps extends TouchableOpacityProps {
    * `force-footer-bottom` - aligns all content to the top, but forces the footer to the bottom.
    */
   verticalAlignment?: "top" | "center" | "space-between" | "force-footer-bottom"
+  /**
+   * Cover image component for the top of the card.
+   */
+  CoverComponent?: ReactElement
+  /**
+   * Avatar component for user cards.
+   */
+  AvatarComponent?: ReactElement
   /**
    * Custom component added to the left of the card body.
    */
@@ -141,6 +155,8 @@ export function Card(props: CardProps) {
     ContentComponent,
     HeadingComponent,
     FooterComponent,
+    CoverComponent,
+    AvatarComponent,
     LeftComponent,
     RightComponent,
     verticalAlignment = "top",
@@ -160,6 +176,7 @@ export function Card(props: CardProps) {
   } = useAppTheme()
 
   const preset: Presets = props.preset ?? "default"
+  const size: Sizes = props.size ?? "md"
   const isPressable = !!WrapperProps.onPress
   const isHeadingPresent = !!(HeadingComponent || heading || headingTx)
   const isContentPresent = !!(ContentComponent || content || contentTx)
@@ -172,6 +189,7 @@ export function Card(props: CardProps) {
 
   const $containerStyle: StyleProp<ViewStyle> = [
     themed($containerPresets[preset]),
+    themed($sizePresets[size]),
     $containerStyleOverride,
   ]
   const $headingStyle = [
@@ -199,72 +217,80 @@ export function Card(props: CardProps) {
     LeftComponent && { marginStart: spacing.md },
     RightComponent && { marginEnd: spacing.md },
   ]
+  
+  const $contentWrapperStyle: ViewStyle = {
+    flex: 1,
+    alignSelf: "stretch",
+  }
 
   return (
     <Wrapper
       style={$containerStyle}
-      activeOpacity={0.8}
+      activeOpacity={0.9}
       accessibilityRole={isPressable ? "button" : undefined}
       {...WrapperProps}
     >
-      {LeftComponent}
-
+      {CoverComponent && <View style={themed($coverStyle)}>{CoverComponent}</View>}
+      
       <View style={$alignmentWrapperStyle}>
-        <HeaderContentWrapper>
-          {HeadingComponent ||
-            (isHeadingPresent && (
-              <Text
-                weight="bold"
-                text={heading}
-                tx={headingTx}
-                txOptions={headingTxOptions}
-                {...HeadingTextProps}
-                style={$headingStyle}
-              />
-            ))}
+        {AvatarComponent && <View style={themed($avatarStyle)}>{AvatarComponent}</View>}
+        
+        {LeftComponent}
 
-          {ContentComponent ||
-            (isContentPresent && (
+        <View style={$contentWrapperStyle}>
+          <HeaderContentWrapper>
+            {HeadingComponent ||
+              (isHeadingPresent && (
+                <Text
+                  preset="heading"
+                  weight="bold"
+                  text={heading}
+                  tx={headingTx}
+                  txOptions={headingTxOptions}
+                  {...HeadingTextProps}
+                  style={$headingStyle}
+                />
+              ))}
+
+            {ContentComponent ||
+              (isContentPresent && (
+                <Text
+                  preset="default"
+                  weight="normal"
+                  text={content}
+                  tx={contentTx}
+                  txOptions={contentTxOptions}
+                  {...ContentTextProps}
+                  style={$contentStyle}
+                />
+              ))}
+          </HeaderContentWrapper>
+
+          {FooterComponent ||
+            (isFooterPresent && (
               <Text
+                preset="default"
                 weight="normal"
-                text={content}
-                tx={contentTx}
-                txOptions={contentTxOptions}
-                {...ContentTextProps}
-                style={$contentStyle}
+                size="xs"
+                text={footer}
+                tx={footerTx}
+                txOptions={footerTxOptions}
+                {...FooterTextProps}
+                style={$footerStyle}
               />
             ))}
-        </HeaderContentWrapper>
+        </View>
 
-        {FooterComponent ||
-          (isFooterPresent && (
-            <Text
-              weight="normal"
-              size="xs"
-              text={footer}
-              tx={footerTx}
-              txOptions={footerTxOptions}
-              {...FooterTextProps}
-              style={$footerStyle}
-            />
-          ))}
+        {RightComponent}
       </View>
-
-      {RightComponent}
     </Wrapper>
   )
 }
 
-const $containerBase: ThemedStyle<ViewStyle> = (theme) => ({
-  borderRadius: theme.spacing.md,
-  padding: theme.spacing.xs,
-  borderWidth: 1,
-  shadowColor: theme.colors.palette.neutral800,
-  shadowOffset: { width: 0, height: 12 },
-  shadowOpacity: 0.08,
-  shadowRadius: 12.81,
-  elevation: 16,
-  minHeight: 96,
+// Modern Card Base Styles
+const $containerBase: ThemedStyle<ViewStyle> = ({ spacing, elevation }) => ({
+  overflow: "hidden",
+  ...elevation.level1, // Modern subtle shadow
 })
 
 const $alignmentWrapper: ViewStyle = {
@@ -279,36 +305,111 @@ const $alignmentWrapperFlexOptions = {
   "force-footer-bottom": "space-between",
 } as const
 
+// Size Presets - Modern scaling with better spacing
+const $sizePresets: Record<Sizes, ThemedStyle<ViewStyle>> = {
+  sm: ({ spacing }) => ({
+    borderRadius: spacing.sm, // 12px rounded corners
+    padding: spacing.sm,      // 12px padding
+    minHeight: 80,
+  }),
+  md: ({ spacing }) => ({
+    borderRadius: spacing.md, // 16px rounded corners
+    padding: spacing.md,      // 16px padding
+    minHeight: 96,
+  }),
+  lg: ({ spacing }) => ({
+    borderRadius: spacing.md, // 16px rounded corners
+    padding: spacing.lg,      // 24px padding
+    minHeight: 120,
+  }),
+}
+
+// Modern Card Presets
 const $containerPresets: Record<Presets, ThemedStyleArray<ViewStyle>> = {
+  // Default: Clean background with subtle shadow
   default: [
-    $styles.row,
     $containerBase,
-    (theme) => ({
-      backgroundColor: theme.colors.palette.neutral100,
-      borderColor: theme.colors.palette.neutral300,
+    ({ colors, elevation }) => ({
+      backgroundColor: colors.background,
+      ...elevation.level1,
     }),
   ],
-  reversed: [
-    $styles.row,
+  
+  // Elevated: Prominent shadow for important cards
+  elevated: [
     $containerBase,
-    (theme) => ({
-      backgroundColor: theme.colors.palette.neutral800,
-      borderColor: theme.colors.palette.neutral500,
+    ({ colors, elevation }) => ({
+      backgroundColor: colors.background,
+      ...elevation.level2,
+    }),
+  ],
+  
+  // Outlined: Modern border with no shadow
+  outlined: [
+    $containerBase,
+    ({ colors, elevation }) => ({
+      backgroundColor: colors.background,
+      borderWidth: 1.5,
+      borderColor: colors.borderSubtle,
+      ...elevation.none,
+    }),
+  ],
+  
+  // Filled: Subtle background tint
+  filled: [
+    $containerBase,
+    ({ colors, elevation }) => ({
+      backgroundColor: colors.backgroundSecondary,
+      ...elevation.level1,
+    }),
+  ],
+  
+  // Legacy reversed for backward compatibility
+  reversed: [
+    $containerBase,
+    ({ colors, elevation }) => ({
+      backgroundColor: colors.text,
+      ...elevation.level1,
     }),
   ],
 }
 
+// Cover image style
+const $coverStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  width: "100%",
+  marginBottom: spacing.sm,
+  borderTopLeftRadius: spacing.md,
+  borderTopRightRadius: spacing.md,
+  overflow: "hidden",
+})
+
+// Avatar style for user cards
+const $avatarStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.sm,
+  alignItems: "center",
+})
+
+// Modern Text Presets with better hierarchy
 const $headingPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
-  default: [],
-  reversed: [(theme) => ({ color: theme.colors.palette.neutral100 })],
+  default: [({ colors }) => ({ color: colors.text })],
+  elevated: [({ colors }) => ({ color: colors.text })],
+  outlined: [({ colors }) => ({ color: colors.text })],
+  filled: [({ colors }) => ({ color: colors.text })],
+  reversed: [({ colors }) => ({ color: colors.background })],
 }
 
 const $contentPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
-  default: [],
-  reversed: [(theme) => ({ color: theme.colors.palette.neutral100 })],
+  default: [({ colors }) => ({ color: colors.textDim })],
+  elevated: [({ colors }) => ({ color: colors.textDim })],
+  outlined: [({ colors }) => ({ color: colors.textDim })],
+  filled: [({ colors }) => ({ color: colors.textDim })],
+  reversed: [({ colors }) => ({ color: colors.palette.neutral300 })],
 }
 
 const $footerPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
-  default: [],
-  reversed: [(theme) => ({ color: theme.colors.palette.neutral100 })],
+  default: [({ colors }) => ({ color: colors.textSubtle })],
+  elevated: [({ colors }) => ({ color: colors.textSubtle })],
+  outlined: [({ colors }) => ({ color: colors.textSubtle })],
+  filled: [({ colors }) => ({ color: colors.textSubtle })],
+  reversed: [({ colors }) => ({ color: colors.palette.neutral400 })],
 }

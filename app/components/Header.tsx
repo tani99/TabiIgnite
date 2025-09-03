@@ -18,6 +18,8 @@ import { ExtendedEdge, useSafeAreaInsetsStyle } from "@/utils/useSafeAreaInsetsS
 import { IconTypes, PressableIcon } from "./Icon"
 import { Text, TextProps } from "./Text"
 
+type HeaderVariants = "default" | "elevated" | "transparent"
+
 export interface HeaderProps {
   /**
    * The layout of the title relative to the action components.
@@ -25,6 +27,10 @@ export interface HeaderProps {
    * - `flex` will attempt to center the title relative to the action buttons. If the action buttons are different widths, the title will be off-center relative to the header.
    */
   titleMode?: "center" | "flex"
+  /**
+   * Header variant style.
+   */
+  variant?: HeaderVariants
   /**
    * Optional title style override.
    */
@@ -155,6 +161,7 @@ export function Header(props: HeaderProps) {
   } = useAppTheme()
   const {
     backgroundColor = colors.background,
+    variant = "default",
     LeftActionComponent,
     leftIcon,
     leftIconColor,
@@ -185,8 +192,17 @@ export function Header(props: HeaderProps) {
   const titleContent = titleTx ? translate(titleTx, titleTxOptions) : title
 
   return (
-    <View style={[$container, $containerInsets, { backgroundColor }, $containerStyleOverride]}>
-      <View style={[$styles.row, $wrapper, $styleOverride]}>
+    <View style={[
+      themed($containerVariants[variant]), 
+      $containerInsets, 
+      { backgroundColor }, 
+      $containerStyleOverride
+    ]}>
+      <View style={[
+        $styles.row, 
+        themed($wrapperVariants[variant]), 
+        $styleOverride
+      ]}>
         <HeaderAction
           tx={leftTx}
           text={leftText}
@@ -208,10 +224,11 @@ export function Header(props: HeaderProps) {
             ]}
           >
             <Text
-              weight="medium"
-              size="md"
+              preset="heading"
+              weight="semiBold"
+              size="lg"
               text={titleContent}
-              style={[$title, $titleStyleOverride]}
+              style={[themed($titleVariants[variant]), $titleStyleOverride]}
             />
           </View>
         )}
@@ -272,31 +289,80 @@ function HeaderAction(props: HeaderActionProps) {
   return <View style={[$actionFillerContainer, { backgroundColor }]} />
 }
 
-const $wrapper: ViewStyle = {
-  height: 56,
-  alignItems: "center",
-  justifyContent: "space-between",
+// Modern Header Styles
+
+// Container Variants
+const $containerVariants: Record<HeaderVariants, ThemedStyle<ViewStyle>> = {
+  default: ({ colors, elevation }) => ({
+    width: "100%",
+    backgroundColor: colors.background,
+    ...elevation.level1, // Subtle shadow
+  }),
+  elevated: ({ colors, elevation }) => ({
+    width: "100%",
+    backgroundColor: colors.background,
+    ...elevation.level2, // More prominent shadow
+  }),
+  transparent: ({ elevation }) => ({
+    width: "100%",
+    backgroundColor: "transparent",
+    ...elevation.none,
+  }),
 }
 
-const $container: ViewStyle = {
-  width: "100%",
+// Wrapper Variants
+const $wrapperVariants: Record<HeaderVariants, ThemedStyle<ViewStyle>> = {
+  default: ({ spacing }) => ({
+    height: 60, // Slightly taller for modern feel
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: spacing.md,
+  }),
+  elevated: ({ spacing }) => ({
+    height: 64, // Even taller for elevated headers
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: spacing.lg,
+  }),
+  transparent: ({ spacing }) => ({
+    height: 56, // Standard height for transparent
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: spacing.md,
+  }),
 }
 
-const $title: TextStyle = {
-  textAlign: "center",
+// Title Variants
+const $titleVariants: Record<HeaderVariants, ThemedStyle<TextStyle>> = {
+  default: ({ colors }) => ({
+    textAlign: "center",
+    color: colors.text,
+  }),
+  elevated: ({ colors }) => ({
+    textAlign: "center",
+    color: colors.text,
+    fontWeight: "600", // Slightly bolder for elevated
+  }),
+  transparent: ({ colors }) => ({
+    textAlign: "center",
+    color: colors.text,
+  }),
 }
 
+// Action Styles with Modern Touch Targets
 const $actionTextContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexGrow: 0,
   alignItems: "center",
   justifyContent: "center",
   height: "100%",
   paddingHorizontal: spacing.md,
+  minWidth: 44, // Minimum touch target
   zIndex: 2,
 })
 
 const $actionText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.tint,
+  fontWeight: "500", // Medium weight for better hierarchy
 })
 
 const $actionIconContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -305,13 +371,17 @@ const $actionIconContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   justifyContent: "center",
   height: "100%",
   paddingHorizontal: spacing.md,
+  minWidth: 44, // Minimum touch target
+  minHeight: 44, // Minimum touch target
+  borderRadius: spacing.sm, // Rounded touch area
   zIndex: 2,
 })
 
 const $actionFillerContainer: ViewStyle = {
-  width: 16,
+  width: 44, // Match minimum touch target
 }
 
+// Title Wrapper Styles
 const $titleWrapperPointerEvents: ViewStyle = {
   pointerEvents: "none",
 }
@@ -322,7 +392,7 @@ const $titleWrapperCenter: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   height: "100%",
   width: "100%",
   position: "absolute",
-  paddingHorizontal: spacing.xxl,
+  paddingHorizontal: spacing.xxxl, // More padding for better text protection
   zIndex: 1,
 })
 

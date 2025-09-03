@@ -2,6 +2,7 @@ import type { StyleProp } from "react-native"
 
 import { colors as colorsLight } from "./colors"
 import { colors as colorsDark } from "./colorsDark"
+import { elevation, elevationDark } from "./elevation"
 import { spacing as spacingLight } from "./spacing"
 import { spacing as spacingDark } from "./spacingDark"
 import { timing } from "./timing"
@@ -16,6 +17,8 @@ export type ThemeContextModeT = ImmutableThemeContextModeT | undefined
 export type Colors = typeof colorsLight | typeof colorsDark
 // The spacing type needs to take into account the different spacing values for light and dark themes.
 export type Spacing = typeof spacingLight | typeof spacingDark
+// The elevation type accounts for different elevation values for light and dark themes.
+export type Elevation = typeof elevation | typeof elevationDark
 
 // These two are consistent across themes.
 export type Timing = typeof timing
@@ -25,6 +28,7 @@ export type Typography = typeof typography
 export interface Theme {
   colors: Colors
   spacing: Spacing
+  elevation: Elevation
   typography: Typography
   timing: Timing
   isDark: boolean
