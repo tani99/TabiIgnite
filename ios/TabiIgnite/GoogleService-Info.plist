@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>912944296995-urf8mveun8n93mb38eammqrd5md10edr.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.912944296995-urf8mveun8n93mb38eammqrd5md10edr</string>
+	<key>API_KEY</key>
+	<string>AIzaSyALE7jIsX890iJwcYf9nTDgGMF-mIIfUW0</string>
+	<key>GCM_SENDER_ID</key>
+	<string>912944296995</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.tabiignite</string>
+	<key>PROJECT_ID</key>
+	<string>tabi-ignite</string>
+	<key>STORAGE_BUCKET</key>
+	<string>tabi-ignite.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:912944296995:ios:8d5fb7bb28aa1f30ee6d96</string>
+</dict>
+</plist>
