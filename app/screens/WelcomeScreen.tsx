@@ -1,5 +1,7 @@
-import { FC } from "react"
-import { Image, ImageStyle, TextStyle, View, ViewStyle } from "react-native"
+import { FC, useCallback, useState } from "react"
+import { Image, ImageStyle, TextStyle, TouchableOpacity, View, ViewStyle } from "react-native"
+import { Drawer } from "react-native-drawer-layout"
+import { Ionicons } from '@expo/vector-icons'
 
 import { Button } from "@/components/Button"
 import { Screen } from "@/components/Screen"
@@ -13,6 +15,8 @@ import type { ThemedStyle } from "@/theme/types"
 import { useHeader } from "@/utils/useHeader"
 import { useSafeAreaInsetsStyle } from "@/utils/useSafeAreaInsetsStyle"
 
+
+
 const welcomeLogo = require("@assets/images/logo.png")
 const welcomeFace = require("@assets/images/welcome-face.png")
 
@@ -20,54 +24,134 @@ interface WelcomeScreenProps extends AppStackScreenProps<"Welcome"> {}
 
 export const WelcomeScreen: FC<WelcomeScreenProps> = function WelcomeScreen(_props) {
   const { themed, theme } = useAppTheme()
+  const [open, setOpen] = useState(false)
 
-  const { navigation } = _props
   const { logout } = useAuth()
 
-  function goNext() {
-    navigation.navigate("Demo", { screen: "DemoShowroom", params: {} })
-  }
+  const toggleDrawer = useCallback(() => {
+    setOpen(!open)
+  }, [open])
 
   useHeader(
     {
-      rightTx: "common:logOut",
-      onRightPress: logout,
+      leftIcon: "menu",
+      onLeftPress: toggleDrawer,
+      RightActionComponent: (
+        <TouchableOpacity
+          onPress={() => {
+            // Add your profile navigation logic here
+          }}
+          style={themed($profileIconContainer)}
+        >
+          <Ionicons name="person-circle" size={32} color={theme.colors.tint} />
+        </TouchableOpacity>
+      ),
     },
-    [logout],
+    [toggleDrawer, theme.colors.tint],
   )
 
   const $bottomContainerInsets = useSafeAreaInsetsStyle(["bottom"])
+  const $drawerInsets = useSafeAreaInsetsStyle(["top"])
+
+  const renderDrawerContent = () => (
+    <View style={themed([$drawer, $drawerInsets])}>
+      <View style={themed($listContentContainer)}>
+        <TouchableOpacity
+          onPress={() => {
+            setOpen(false)
+            // Add your account navigation logic here
+          }}
+          style={themed($menuContainer)}
+        >
+          <Text preset="default" text="Account" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          onPress={() => {
+            setOpen(false)
+            // Add your option 1 logic here
+          }}
+          style={themed($menuContainer)}
+        >
+          <Text preset="default" text="Option 1" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          onPress={() => {
+            setOpen(false)
+            // Add your option 2 logic here
+          }}
+          style={themed($menuContainer)}
+        >
+          <Text preset="default" text="Option 2" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          onPress={() => {
+            setOpen(false)
+            // Add your option 3 logic here
+          }}
+          style={themed($menuContainer)}
+        >
+          <Text preset="default" text="Option 3" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Logout Button at bottom of drawer */}
+      <View style={themed($logoutContainer)}>
+        <TouchableOpacity
+          onPress={() => {
+            setOpen(false)
+            logout()
+          }}
+          style={themed($logoutButton)}
+        >
+          <Text preset="default" tx="common:logOut" />
+        </TouchableOpacity>
+      </View>
+    </View>
+  )
 
   return (
-    <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
-      <View style={themed($topContainer)}>
-        <Image style={themed($welcomeLogo)} source={welcomeLogo} resizeMode="contain" />
-        <Text
-          testID="welcome-heading"
-          style={themed($welcomeHeading)}
-          tx="welcomeScreen:readyForLaunch"
-          preset="heading"
-        />
-        <Text tx="welcomeScreen:exciting" preset="subheading" />
-        <Image
-          style={$welcomeFace}
-          source={welcomeFace}
-          resizeMode="contain"
-          tintColor={theme.colors.palette.neutral900}
-        />
-      </View>
+    <Drawer
+      open={open}
+      onOpen={() => setOpen(true)}
+      onClose={() => setOpen(false)}
+      drawerType="back"
+      drawerPosition={isRTL ? "right" : "left"}
+      renderDrawerContent={renderDrawerContent}
+    >
+      <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
+        <View style={themed($topContainer)}>
+          <Text
+            testID="welcome-heading"
+            style={themed($welcomeHeading)}
+            tx="welcomeScreen:readyForLaunch"
+            preset="heading"
+          />
+          <Text tx="welcomeScreen:exciting" preset="subheading" />
+          <Image
+            style={$welcomeFace}
+            source={welcomeFace}
+            resizeMode="contain"
+            tintColor={theme.colors.palette.neutral900}
+          />
+        </View>
 
-      <View style={themed([$bottomContainer, $bottomContainerInsets])}>
-        <Text tx="welcomeScreen:postscript" size="md" />
+        <View style={themed([$bottomContainer, $bottomContainerInsets])}>
+          <Text tx="welcomeScreen:postscript" size="md" />
 
-        <Button
-          testID="next-screen-button"
-          preset="reversed"
-          tx="welcomeScreen:letsGo"
-          onPress={goNext}
-        />
-      </View>
-    </Screen>
+          <Button
+            testID="next-screen-button"
+            preset="reversed"
+            tx="welcomeScreen:letsGo"
+            onPress={() => {
+              // Add your navigation logic here
+            }}
+          />
+        </View>
+      </Screen>
+    </Drawer>
   )
 }
 
@@ -107,4 +191,38 @@ const $welcomeFace: ImageStyle = {
 
 const $welcomeHeading: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.md,
+})
+
+const $drawer: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.background,
+  flex: 1,
+})
+
+
+
+const $listContentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingHorizontal: spacing.lg,
+})
+
+const $menuContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingBottom: spacing.xs,
+  paddingTop: spacing.lg,
+})
+
+const $logoutContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingHorizontal: spacing.lg,
+  paddingBottom: spacing.lg,
+  borderTopWidth: 1,
+  borderTopColor: "rgba(0,0,0,0.1)",
+  paddingTop: spacing.md,
+})
+
+const $logoutButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginTop: spacing.sm,
+})
+
+const $profileIconContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingHorizontal: spacing.md,
+  justifyContent: "center",
+  alignItems: "center",
 })
