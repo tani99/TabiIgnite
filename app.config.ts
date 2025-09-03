@@ -34,6 +34,17 @@ module.exports = ({ config }: ConfigContext): Partial<ExpoConfig> => {
         ],
       },
     },
-    plugins: [...existingPlugins, require("./plugins/withSplashScreen").withSplashScreen],
+    plugins: [
+      ...existingPlugins, 
+      require("./plugins/withSplashScreen").withSplashScreen,
+      // Firebase configuration for EAS builds
+      [
+        "@react-native-firebase/app",
+        {
+          // Firebase configuration will be read from google-services.json and GoogleService-Info.plist
+          // No additional configuration needed here as we're using the native config files
+        }
+      ]
+    ],
   }
 }

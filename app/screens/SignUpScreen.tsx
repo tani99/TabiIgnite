@@ -12,6 +12,7 @@ import { useAuth } from "@/context/AuthContext"
 import type { AppStackScreenProps } from "@/navigators/AppNavigator"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
+import { getErrorMessageForDisplay } from "@/utils/firebaseErrorHandler"
 
 interface SignUpScreenProps extends AppStackScreenProps<"SignUp"> {}
 
@@ -42,13 +43,23 @@ export const SignUpScreen: FC<SignUpScreenProps> = () => {
     return ""
   }, [isSubmitted, authConfirmPassword, authPassword])
 
-  const error = isSubmitted ? validationError || firebaseError || confirmPasswordError : ""
+  const passwordValidationError = useMemo(() => {
+    if (!isSubmitted) return ""
+    if (!authPassword) return "can't be blank"
+    if (authPassword.length < 6) return "must be at least 6 characters"
+    return ""
+  }, [isSubmitted, authPassword])
+
+  const emailError = isSubmitted && (validationError && validationError.includes("email") || firebaseError) ? (validationError && validationError.includes("email") ? validationError : firebaseError) : ""
+  const passwordError = isSubmitted && (passwordValidationError || (validationError && !validationError.includes("email"))) ? (passwordValidationError || validationError) : ""
+
+  const error = isSubmitted ? validationError || firebaseError || confirmPasswordError || passwordValidationError : ""
 
   async function handleSignUp() {
     setIsSubmitted(true)
     setFirebaseError("")
 
-    if (validationError || confirmPasswordError) return
+    if (validationError || confirmPasswordError || passwordValidationError) return
 
     try {
       setIsLoading(true)
@@ -63,20 +74,10 @@ export const SignUpScreen: FC<SignUpScreenProps> = () => {
       setAuthEmail("")
     } catch (error: any) {
       setIsLoading(false)
-      setIsSubmitted(false)
+      // Don't reset isSubmitted on Firebase errors - keep it true to show the error
 
-      // Handle Firebase auth errors
-      if (error.code === "auth/email-already-in-use") {
-        setFirebaseError("An account with this email already exists")
-      } else if (error.code === "auth/invalid-email") {
-        setFirebaseError("Invalid email address")
-      } else if (error.code === "auth/weak-password") {
-        setFirebaseError("Password is too weak. Use at least 6 characters")
-      } else if (error.code === "auth/network-request-failed") {
-        setFirebaseError("Network error. Please check your connection")
-      } else {
-        setFirebaseError("Sign up failed. Please try again")
-      }
+      // Handle Firebase auth errors using centralized error handler
+      setFirebaseError(getErrorMessageForDisplay(error.code))
     }
   }
 
@@ -131,6 +132,10 @@ export const SignUpScreen: FC<SignUpScreenProps> = () => {
         onChangeText={(text) => {
           setAuthEmail(text)
           setAuthEmailContext(text)
+          // Clear Firebase error when user starts typing
+          if (firebaseError) {
+            setFirebaseError("")
+          }
         }}
         containerStyle={themed($textField)}
         autoCapitalize="none"
@@ -139,16 +144,28 @@ export const SignUpScreen: FC<SignUpScreenProps> = () => {
         keyboardType="email-address"
         labelTx="signUpScreen:emailFieldLabel"
         placeholderTx="signUpScreen:emailFieldPlaceholder"
-        helper={error}
-        status={error ? "error" : undefined}
+        helper={emailError}
+        status={emailError ? "error" : undefined}
         onSubmitEditing={() => authPasswordInput.current?.focus()}
+        onBlur={() => {
+          // Clear Firebase error when field loses focus
+          if (firebaseError) {
+            setFirebaseError("")
+          }
+        }}
         editable={!isLoading}
       />
 
       <TextField
         ref={authPasswordInput}
         value={authPassword}
-        onChangeText={setAuthPassword}
+        onChangeText={(text) => {
+          setAuthPassword(text)
+          // Clear Firebase error when user starts typing password
+          if (firebaseError) {
+            setFirebaseError("")
+          }
+        }}
         containerStyle={themed($textField)}
         autoCapitalize="none"
         autoComplete="password"
@@ -156,6 +173,8 @@ export const SignUpScreen: FC<SignUpScreenProps> = () => {
         secureTextEntry={isAuthPasswordHidden}
         labelTx="signUpScreen:passwordFieldLabel"
         placeholderTx="signUpScreen:passwordFieldPlaceholder"
+        helper={passwordError}
+        status={passwordError ? "error" : undefined}
         onSubmitEditing={() => authConfirmPasswordInput.current?.focus()}
         RightAccessory={PasswordRightAccessory}
         editable={!isLoading}
@@ -164,7 +183,13 @@ export const SignUpScreen: FC<SignUpScreenProps> = () => {
       <TextField
         ref={authConfirmPasswordInput}
         value={authConfirmPassword}
-        onChangeText={setAuthConfirmPassword}
+        onChangeText={(text) => {
+          setAuthConfirmPassword(text)
+          // Clear Firebase error when user starts typing confirm password
+          if (firebaseError) {
+            setFirebaseError("")
+          }
+        }}
         containerStyle={themed($textField)}
         autoCapitalize="none"
         autoComplete="password"
@@ -172,6 +197,8 @@ export const SignUpScreen: FC<SignUpScreenProps> = () => {
         secureTextEntry={isAuthConfirmPasswordHidden}
         labelTx="signUpScreen:confirmPasswordFieldLabel"
         placeholderTx="signUpScreen:confirmPasswordFieldPlaceholder"
+        helper={confirmPasswordError}
+        status={confirmPasswordError ? "error" : undefined}
         onSubmitEditing={handleSignUp}
         RightAccessory={ConfirmPasswordRightAccessory}
         editable={!isLoading}
@@ -197,6 +224,8 @@ export const SignUpScreen: FC<SignUpScreenProps> = () => {
           }}
         />
       </Text>
+
+
     </Screen>
   )
 }

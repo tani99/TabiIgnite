@@ -12,6 +12,7 @@ import { useAuth } from "@/context/AuthContext"
 import type { AppStackScreenProps } from "@/navigators/AppNavigator"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
+import { getErrorMessageForDisplay } from "@/utils/firebaseErrorHandler"
 
 interface LoginScreenProps extends AppStackScreenProps<"Login"> {}
 
@@ -38,7 +39,8 @@ export const LoginScreen: FC<LoginScreenProps> = () => {
     // No pre-filling of credentials for security
   }, [])
 
-  const error = isSubmitted ? validationError || firebaseError : ""
+  const emailError = isSubmitted && validationError && validationError.includes("email") ? validationError : ""
+  const passwordError = isSubmitted && (firebaseError || (validationError && !validationError.includes("email"))) ? (firebaseError || validationError) : ""
 
   async function handleLogin() {
     setIsSubmitted(true)
@@ -59,22 +61,12 @@ export const LoginScreen: FC<LoginScreenProps> = () => {
       setAuthEmail("")
     } catch (error: any) {
       setIsLoading(false)
-      setIsSubmitted(false)
+      // Don't reset isSubmitted on Firebase errors - keep it true to show the error
 
-      // Handle Firebase auth errors
-      if (error.code === "auth/user-not-found") {
-        setFirebaseError("No account found with this email address")
-      } else if (error.code === "auth/wrong-password") {
-        setFirebaseError("Incorrect password")
-      } else if (error.code === "auth/invalid-email") {
-        setFirebaseError("Invalid email address")
-      } else if (error.code === "auth/too-many-requests") {
-        setFirebaseError("Too many failed attempts. Please try again later")
-      } else if (error.code === "auth/network-request-failed") {
-        setFirebaseError("Network error. Please check your connection")
-      } else {
-        setFirebaseError("Login failed. Please try again")
-      }
+
+
+      // Handle Firebase auth errors using centralized error handler
+      setFirebaseError(getErrorMessageForDisplay(error.code))
     }
   }
 
@@ -108,7 +100,13 @@ export const LoginScreen: FC<LoginScreenProps> = () => {
 
       <TextField
         value={authEmail}
-        onChangeText={setAuthEmail}
+        onChangeText={(text) => {
+          setAuthEmail(text)
+          // Clear Firebase error when user starts typing
+          if (firebaseError) {
+            setFirebaseError("")
+          }
+        }}
         containerStyle={themed($textField)}
         autoCapitalize="none"
         autoComplete="email"
@@ -116,16 +114,28 @@ export const LoginScreen: FC<LoginScreenProps> = () => {
         keyboardType="email-address"
         labelTx="loginScreen:emailFieldLabel"
         placeholderTx="loginScreen:emailFieldPlaceholder"
-        helper={error}
-        status={error ? "error" : undefined}
+        helper={emailError}
+        status={emailError ? "error" : undefined}
         onSubmitEditing={() => authPasswordInput.current?.focus()}
+        onBlur={() => {
+          // Clear Firebase error when field loses focus
+          if (firebaseError) {
+            setFirebaseError("")
+          }
+        }}
         editable={!isLoading}
       />
 
       <TextField
         ref={authPasswordInput}
         value={authPassword}
-        onChangeText={setAuthPassword}
+        onChangeText={(text) => {
+          setAuthPassword(text)
+          // Clear Firebase error when user starts typing password
+          if (firebaseError) {
+            setFirebaseError("")
+          }
+        }}
         containerStyle={themed($textField)}
         autoCapitalize="none"
         autoComplete="password"
@@ -133,10 +143,14 @@ export const LoginScreen: FC<LoginScreenProps> = () => {
         secureTextEntry={isAuthPasswordHidden}
         labelTx="loginScreen:passwordFieldLabel"
         placeholderTx="loginScreen:passwordFieldPlaceholder"
+        helper={passwordError}
+        status={passwordError ? "error" : undefined}
         onSubmitEditing={handleLogin}
         RightAccessory={PasswordRightAccessory}
         editable={!isLoading}
       />
+
+
 
       <Button
         testID="login-button"
@@ -165,6 +179,8 @@ export const LoginScreen: FC<LoginScreenProps> = () => {
           }}
         />
       </Text>
+
+
     </Screen>
   )
 }

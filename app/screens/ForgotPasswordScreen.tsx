@@ -54,7 +54,7 @@ export const ForgotPasswordScreen: FC<ForgotPasswordScreenProps> = () => {
       }, 3000)
     } catch (error: any) {
       setIsLoading(false)
-      setIsSubmitted(false)
+      // Don't reset isSubmitted on Firebase errors - keep it true to show the error
 
       // Handle Firebase auth errors
       if (error.code === "auth/user-not-found") {
@@ -102,6 +102,10 @@ export const ForgotPasswordScreen: FC<ForgotPasswordScreenProps> = () => {
         onChangeText={(text) => {
           setAuthEmail(text)
           setAuthEmailContext(text)
+          // Clear Firebase error when user starts typing
+          if (firebaseError) {
+            setFirebaseError("")
+          }
         }}
         containerStyle={themed($textField)}
         autoCapitalize="none"
@@ -113,6 +117,12 @@ export const ForgotPasswordScreen: FC<ForgotPasswordScreenProps> = () => {
         helper={error}
         status={error ? "error" : undefined}
         onSubmitEditing={handleResetPassword}
+        onBlur={() => {
+          // Clear Firebase error when field loses focus
+          if (firebaseError) {
+            setFirebaseError("")
+          }
+        }}
         editable={!isLoading}
       />
 
