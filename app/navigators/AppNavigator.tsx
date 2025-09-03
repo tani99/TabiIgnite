@@ -18,7 +18,7 @@ import { SignUpScreen } from "@/screens/SignUpScreen"
 import { WelcomeScreen } from "@/screens/WelcomeScreen"
 import { useAppTheme } from "@/theme/context"
 
-import { DemoNavigator, DemoTabParamList } from "./DemoNavigator"
+
 import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
 
 /**
@@ -36,7 +36,6 @@ export type AppStackParamList = {
   SignUp: undefined
   ForgotPassword: undefined
   Profile: undefined
-  Demo: NavigatorScreenParams<DemoTabParamList>
   // 🔥 Your screens go here
   // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
 }
@@ -78,7 +77,6 @@ const AppStack = () => {
         <>
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
           <Stack.Screen name="Profile" component={ProfileScreen} />
-          <Stack.Screen name="Demo" component={DemoNavigator} />
         </>
       ) : (
         <>

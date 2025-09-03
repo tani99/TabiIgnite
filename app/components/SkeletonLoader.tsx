@@ -66,7 +66,7 @@ export function SkeletonLoader({
       }
 
   return (
-    <View style={[themed($container), { width, height, borderRadius }, style]}>
+    <View style={[themed($container), { width: width as any, height: height as any, borderRadius }, style]}>
       <Animated.View style={[themed($shimmer), animatedStyle]} />
     </View>
   )
@@ -103,6 +103,13 @@ export const SkeletonPresets = {
   ),
 
   /**
+   * Subtitle skeleton
+   */
+  Subtitle: ({ width = "50%", ...props }: Partial<SkeletonLoaderProps>) => (
+    <SkeletonLoader width={width} height={18} borderRadius={3} {...props} />
+  ),
+
+  /**
    * Button skeleton
    */
   Button: ({ width = 120, ...props }: Partial<SkeletonLoaderProps>) => (
@@ -129,6 +136,27 @@ export const SkeletonPresets = {
   Image: ({ width = "100%", height = 200, ...props }: Partial<SkeletonLoaderProps>) => (
     <SkeletonLoader width={width} height={height} borderRadius={8} {...props} />
   ),
+
+  /**
+   * List item skeleton
+   */
+  ListItem: ({ ...props }: Partial<SkeletonLoaderProps>) => (
+    <SkeletonLoader width="100%" height={60} borderRadius={6} {...props} />
+  ),
+
+  /**
+   * Input field skeleton
+   */
+  Input: ({ ...props }: Partial<SkeletonLoaderProps>) => (
+    <SkeletonLoader width="100%" height={48} borderRadius={6} {...props} />
+  ),
+
+  /**
+   * Icon skeleton
+   */
+  Icon: ({ size = 24, ...props }: Partial<SkeletonLoaderProps> & { size?: number }) => (
+    <SkeletonLoader width={size} height={size} borderRadius={4} {...props} />
+  ),
 }
 
 /**
@@ -152,3 +180,121 @@ export function SkeletonGroup({ children, style }: SkeletonGroupProps) {
 const $groupContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   gap: spacing.sm,
 })
+
+/**
+ * Complex skeleton layouts for common screen patterns
+ */
+export const SkeletonLayouts = {
+  /**
+   * Profile screen skeleton
+   */
+  ProfileScreen: () => (
+    <SkeletonGroup>
+      <View style={{ alignItems: "center", marginBottom: 24 }}>
+        <SkeletonPresets.Avatar size={80} />
+        <View style={{ marginTop: 16, alignItems: "center" }}>
+          <SkeletonPresets.Title width="60%" />
+          <SkeletonPresets.Subtitle width="40%" />
+        </View>
+      </View>
+      <SkeletonPresets.Card />
+      <SkeletonGroup>
+        <SkeletonPresets.ListItem />
+        <SkeletonPresets.ListItem />
+        <SkeletonPresets.ListItem />
+      </SkeletonGroup>
+    </SkeletonGroup>
+  ),
+
+  /**
+   * Article/Post skeleton
+   */
+  Article: () => (
+    <SkeletonGroup>
+      <SkeletonPresets.Image height={200} />
+      <SkeletonPresets.Title />
+      <SkeletonPresets.Subtitle />
+      <SkeletonGroup>
+        <SkeletonPresets.TextLine />
+        <SkeletonPresets.TextLine width="80%" />
+        <SkeletonPresets.TextLine width="90%" />
+      </SkeletonGroup>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 16 }}>
+        <SkeletonPresets.Button width={100} />
+        <SkeletonPresets.Icon />
+      </View>
+    </SkeletonGroup>
+  ),
+
+  /**
+   * Chat message skeleton
+   */
+  ChatMessage: () => (
+    <View style={{ flexDirection: "row", alignItems: "flex-start", marginBottom: 16 }}>
+      <SkeletonPresets.Avatar size={40} />
+      <View style={{ flex: 1, marginLeft: 12 }}>
+        <SkeletonPresets.TextLine width="30%" />
+        <SkeletonGroup style={{ marginTop: 4 }}>
+          <SkeletonPresets.TextLine width="90%" />
+          <SkeletonPresets.TextLine width="60%" />
+        </SkeletonGroup>
+      </View>
+    </View>
+  ),
+
+  /**
+   * Settings screen skeleton
+   */
+  SettingsScreen: () => (
+    <SkeletonGroup>
+      <SkeletonPresets.Title width="50%" />
+      <SkeletonGroup>
+        {Array.from({ length: 6 }, (_, i) => (
+          <View key={i} style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 8 }}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <SkeletonPresets.Icon />
+              <SkeletonPresets.TextLine width={120} style={{ marginLeft: 12 }} />
+            </View>
+            <SkeletonPresets.Icon size={16} />
+          </View>
+        ))}
+      </SkeletonGroup>
+    </SkeletonGroup>
+  ),
+
+  /**
+   * Form skeleton
+   */
+  Form: () => (
+    <SkeletonGroup>
+      <SkeletonPresets.Title width="40%" />
+      <SkeletonPresets.Subtitle width="70%" />
+      <SkeletonGroup>
+        <SkeletonPresets.Input />
+        <SkeletonPresets.Input />
+        <SkeletonPresets.Input />
+        <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 24 }}>
+          <SkeletonPresets.Button width="45%" />
+          <SkeletonPresets.Button width="45%" />
+        </View>
+      </SkeletonGroup>
+    </SkeletonGroup>
+  ),
+
+  /**
+   * Card list skeleton
+   */
+  CardList: ({ count = 3 }: { count?: number } = {}) => (
+    <SkeletonGroup>
+      {Array.from({ length: count }, (_, i) => (
+        <View key={i} style={{ marginBottom: 16 }}>
+          <SkeletonPresets.Card />
+          <View style={{ paddingHorizontal: 16, marginTop: 8 }}>
+            <SkeletonPresets.Title width="80%" />
+            <SkeletonPresets.TextLine width="60%" />
+          </View>
+        </View>
+      ))}
+    </SkeletonGroup>
+  ),
+}

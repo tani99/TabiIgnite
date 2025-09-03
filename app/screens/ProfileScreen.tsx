@@ -3,6 +3,7 @@ import { Animated, TextStyle, ViewStyle, View, Image, ImageStyle, ScrollView } f
 import { useNavigation } from "@react-navigation/native"
 
 import { Button } from "@/components/Button"
+import { Header } from "@/components/Header"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { Switch } from "@/components/Toggle/Switch"
@@ -56,10 +57,18 @@ export const ProfileScreen: FC<ProfileScreenProps> = () => {
 
   return (
     <Screen
-      preset="auto"
+      preset="fixed"
       contentContainerStyle={themed($screenContentContainer)}
       safeAreaEdges={["top", "bottom"]}
     >
+      <Header
+        title="Profile"
+        leftIcon="back"
+        onLeftPress={() => navigation.goBack()}
+        rightText="Logout"
+        onRightPress={handleLogout}
+        safeAreaEdges={[]}
+      />
       <ScrollView 
         contentContainerStyle={themed($scrollContainer)}
         showsVerticalScrollIndicator={false}
@@ -182,17 +191,6 @@ export const ProfileScreen: FC<ProfileScreenProps> = () => {
 
           {/* Actions Section */}
           <View style={themed($actionsSection)}>
-            <Button
-              preset="secondary"
-              size="lg"
-              onPress={() => navigation.navigate("Demo" as never)}
-              style={themed($actionButton)}
-            >
-              <Text preset="default" size="md" weight="medium" style={themed($buttonText)}>
-                Explore Demo
-              </Text>
-            </Button>
-
             <Button
               preset="ghost"
               size="lg"

@@ -29,8 +29,8 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = function WelcomeScreen(_pro
   const slideAnim = useRef(new Animated.Value(50)).current
   const logoAnim = useRef(new Animated.Value(0)).current
 
-  function goNext() {
-    navigation.navigate("Demo", { screen: "DemoShowroom", params: {} })
+  function goToProfile() {
+    navigation.navigate("Profile")
   }
 
   useHeader(
@@ -171,20 +171,12 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = function WelcomeScreen(_pro
         ]}
       >
         <Button
-          testID="next-screen-button"
+          testID="profile-button"
           preset="primary"
           size="lg"
-          tx="welcomeScreen:letsGo"
-          onPress={goNext}
-          style={themed($primaryButton)}
-        />
-        <Button
-          testID="profile-button"
-          preset="secondary"
-          size="md"
           text="View Profile"
-          onPress={() => navigation.navigate("Profile")}
-          style={themed($secondaryButton)}
+          onPress={goToProfile}
+          style={themed($primaryButton)}
         />
       </Animated.View>
     </Screen>

@@ -1,248 +1,306 @@
-import { Image, ImageProps, ImageStyle, StyleProp, TextStyle, View, ViewStyle } from "react-native"
+import React from "react"
+import { Image, ImageStyle, View, ViewStyle } from "react-native"
 
-import { translate } from "@/i18n/translate"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
-import { Button, ButtonProps } from "./Button"
-import { Text, TextProps } from "./Text"
+import { Button } from "./Button"
+import { Icon, IconTypes } from "./Icon"
+import { Text } from "./Text"
 
-const sadFace = require("@assets/images/sad-face.png")
-
-interface EmptyStateProps {
+export interface EmptyStateProps {
   /**
-   * An optional prop that specifies the text/image set to use for the empty state.
+   * Title for the empty state
    */
-  preset?: "generic"
+  title?: string
   /**
-   * Style override for the container.
+   * Translation key for the title
    */
-  style?: StyleProp<ViewStyle>
+  titleTx?: string
   /**
-   * An Image source to be displayed above the heading.
+   * Description text for the empty state
    */
-  imageSource?: ImageProps["source"]
+  description?: string
   /**
-   * Style overrides for image.
+   * Translation key for the description
    */
-  imageStyle?: StyleProp<ImageStyle>
+  descriptionTx?: string
   /**
-   * Pass any additional props directly to the Image component.
+   * Icon to display
    */
-  ImageProps?: Omit<ImageProps, "source">
+  icon?: IconTypes
   /**
-   * The heading text to display if not using `headingTx`.
+   * Custom image to display instead of icon
    */
-  heading?: TextProps["text"]
+  image?: any
   /**
-   * Heading text which is looked up via i18n.
+   * Primary action button text
    */
-  headingTx?: TextProps["tx"]
+  buttonText?: string
   /**
-   * Optional heading options to pass to i18n. Useful for interpolation
-   * as well as explicitly setting locale or translation fallbacks.
+   * Translation key for button text
    */
-  headingTxOptions?: TextProps["txOptions"]
+  buttonTx?: string
   /**
-   * Style overrides for heading text.
+   * Primary action callback
    */
-  headingStyle?: StyleProp<TextStyle>
+  onButtonPress?: () => void
   /**
-   * Pass any additional props directly to the heading Text component.
+   * Secondary action button text
    */
-  HeadingTextProps?: TextProps
+  secondaryButtonText?: string
   /**
-   * The content text to display if not using `contentTx`.
+   * Translation key for secondary button
    */
-  content?: TextProps["text"]
+  secondaryButtonTx?: string
   /**
-   * Content text which is looked up via i18n.
+   * Secondary action callback
    */
-  contentTx?: TextProps["tx"]
+  onSecondaryButtonPress?: () => void
   /**
-   * Optional content options to pass to i18n. Useful for interpolation
-   * as well as explicitly setting locale or translation fallbacks.
+   * Preset style for different contexts
    */
-  contentTxOptions?: TextProps["txOptions"]
+  preset?: "default" | "search" | "error" | "offline" | "maintenance"
   /**
-   * Style overrides for content text.
+   * Style override for the container
    */
-  contentStyle?: StyleProp<TextStyle>
-  /**
-   * Pass any additional props directly to the content Text component.
-   */
-  ContentTextProps?: TextProps
-  /**
-   * The button text to display if not using `buttonTx`.
-   */
-  button?: TextProps["text"]
-  /**
-   * Button text which is looked up via i18n.
-   */
-  buttonTx?: TextProps["tx"]
-  /**
-   * Optional button options to pass to i18n. Useful for interpolation
-   * as well as explicitly setting locale or translation fallbacks.
-   */
-  buttonTxOptions?: TextProps["txOptions"]
-  /**
-   * Style overrides for button.
-   */
-  buttonStyle?: ButtonProps["style"]
-  /**
-   * Style overrides for button text.
-   */
-  buttonTextStyle?: ButtonProps["textStyle"]
-  /**
-   * Called when the button is pressed.
-   */
-  buttonOnPress?: ButtonProps["onPress"]
-  /**
-   * Pass any additional props directly to the Button component.
-   */
-  ButtonProps?: ButtonProps
-}
-
-interface EmptyStatePresetItem {
-  imageSource: ImageProps["source"]
-  heading: TextProps["text"]
-  content: TextProps["text"]
-  button: TextProps["text"]
+  style?: ViewStyle
 }
 
 /**
- * A component to use when there is no data to display. It can be utilized to direct the user what to do next.
- * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/app/components/EmptyState/}
- * @param {EmptyStateProps} props - The props for the `EmptyState` component.
- * @returns {JSX.Element} The rendered `EmptyState` component.
+ * EmptyState component for displaying helpful empty states
+ * Provides engaging feedback when content is not available
  */
-export function EmptyState(props: EmptyStateProps) {
-  const {
-    theme,
-    themed,
-    theme: { spacing },
-  } = useAppTheme()
+export function EmptyState({
+  title,
+  titleTx,
+  description,
+  descriptionTx,
+  icon,
+  image,
+  buttonText,
+  buttonTx,
+  onButtonPress,
+  secondaryButtonText,
+  secondaryButtonTx,
+  onSecondaryButtonPress,
+  preset = "default",
+  style,
+}: EmptyStateProps) {
+  const { themed } = useAppTheme()
 
-  const EmptyStatePresets = {
-    generic: {
-      imageSource: sadFace,
-      heading: translate("emptyStateComponent:generic.heading"),
-      content: translate("emptyStateComponent:generic.content"),
-      button: translate("emptyStateComponent:generic.button"),
-    } as EmptyStatePresetItem,
-  } as const
-
-  const preset = EmptyStatePresets[props.preset ?? "generic"]
-
-  const {
-    button = preset.button,
-    buttonTx,
-    buttonOnPress,
-    buttonTxOptions,
-    content = preset.content,
-    contentTx,
-    contentTxOptions,
-    heading = preset.heading,
-    headingTx,
-    headingTxOptions,
-    imageSource = preset.imageSource,
-    style: $containerStyleOverride,
-    buttonStyle: $buttonStyleOverride,
-    buttonTextStyle: $buttonTextStyleOverride,
-    contentStyle: $contentStyleOverride,
-    headingStyle: $headingStyleOverride,
-    imageStyle: $imageStyleOverride,
-    ButtonProps,
-    ContentTextProps,
-    HeadingTextProps,
-    ImageProps,
-  } = props
-
-  const isImagePresent = !!imageSource
-  const isHeadingPresent = !!(heading || headingTx)
-  const isContentPresent = !!(content || contentTx)
-  const isButtonPresent = !!(button || buttonTx)
-
-  const $containerStyles = [$containerStyleOverride]
-  const $imageStyles = [
-    $image,
-    (isHeadingPresent || isContentPresent || isButtonPresent) && { marginBottom: spacing.xxxs },
-    $imageStyleOverride,
-    ImageProps?.style,
-  ]
-  const $headingStyles = [
-    themed($heading),
-    isImagePresent && { marginTop: spacing.xxxs },
-    (isContentPresent || isButtonPresent) && { marginBottom: spacing.xxxs },
-    $headingStyleOverride,
-    HeadingTextProps?.style,
-  ]
-  const $contentStyles = [
-    themed($content),
-    (isImagePresent || isHeadingPresent) && { marginTop: spacing.xxxs },
-    isButtonPresent && { marginBottom: spacing.xxxs },
-    $contentStyleOverride,
-    ContentTextProps?.style,
-  ]
-  const $buttonStyles = [
-    (isImagePresent || isHeadingPresent || isContentPresent) && { marginTop: spacing.xl },
-    $buttonStyleOverride,
-    ButtonProps?.style,
-  ]
+  const presetConfig = EMPTY_STATE_PRESETS[preset]
+  const finalIcon = icon || presetConfig.icon
+  const finalTitle = title || titleTx || presetConfig.title
+  const finalDescription = description || descriptionTx || presetConfig.description
 
   return (
-    <View style={$containerStyles}>
-      {isImagePresent && (
-        <Image
-          source={imageSource}
-          {...ImageProps}
-          style={$imageStyles}
-          tintColor={theme.colors.palette.neutral900}
-        />
-      )}
+    <View style={[themed($container), style]}>
+      {/* Illustration */}
+      <View style={themed($illustrationContainer)}>
+        {image ? (
+          <Image source={image} style={themed($image)} resizeMode="contain" />
+        ) : finalIcon ? (
+          <View style={themed($iconContainer)}>
+            <Icon 
+              icon={finalIcon} 
+              size="xl" 
+              state={presetConfig.iconState}
 
-      {isHeadingPresent && (
-        <Text
-          preset="subheading"
-          text={heading}
-          tx={headingTx}
-          txOptions={headingTxOptions}
-          {...HeadingTextProps}
-          style={$headingStyles}
-        />
-      )}
+            />
+          </View>
+        ) : null}
+      </View>
 
-      {isContentPresent && (
-        <Text
-          text={content}
-          tx={contentTx}
-          txOptions={contentTxOptions}
-          {...ContentTextProps}
-          style={$contentStyles}
-        />
-      )}
+      {/* Content */}
+      <View style={themed($contentContainer)}>
+        {finalTitle && (
+          <Text
+            text={title || presetConfig.title}
+            preset="heading"
+            size="lg"
+            weight="semiBold"
+            style={[themed($title), { textAlign: "center" }]}
+          />
+        )}
 
-      {isButtonPresent && (
-        <Button
-          onPress={buttonOnPress}
-          text={button}
-          tx={buttonTx}
-          txOptions={buttonTxOptions}
-          textStyle={$buttonTextStyleOverride}
-          {...ButtonProps}
-          style={$buttonStyles}
-        />
+        {finalDescription && (
+          <Text
+            text={description || presetConfig.description}
+            preset="default"
+            size="md"
+            style={[themed($description), { textAlign: "center", lineHeight: 24 }]}
+          />
+        )}
+      </View>
+
+      {/* Actions */}
+      {(onButtonPress || onSecondaryButtonPress) && (
+        <View style={themed($actionsContainer)}>
+          {onButtonPress && (
+            <Button
+              text={buttonText || presetConfig.buttonText}
+              preset="primary"
+              size="lg"
+              onPress={onButtonPress}
+              style={themed($primaryButton)}
+            />
+          )}
+
+          {onSecondaryButtonPress && (
+            <Button
+              text={secondaryButtonText || presetConfig.secondaryButtonText || "Secondary"}
+              preset="secondary"
+              size="md"
+              onPress={onSecondaryButtonPress}
+              style={themed($secondaryButton)}
+            />
+          )}
+        </View>
       )}
     </View>
   )
 }
 
-const $image: ImageStyle = { alignSelf: "center" }
-const $heading: ThemedStyle<TextStyle> = ({ spacing }) => ({
-  textAlign: "center",
+// Empty State Presets for different contexts
+const EMPTY_STATE_PRESETS = {
+  default: {
+    icon: "components" as IconTypes,
+    iconState: "inactive" as const,
+    title: "Nothing here yet",
+    description: "Content will appear here when available",
+    buttonText: "Refresh",
+    secondaryButtonText: "Go Back",
+  },
+  search: {
+    icon: "view" as IconTypes,
+    iconState: "inactive" as const,
+    title: "No results found",
+    description: "Try adjusting your search terms or filters",
+    buttonText: "Clear Search",
+    secondaryButtonText: "Browse All",
+  },
+  error: {
+    icon: "x" as IconTypes,
+    iconState: "inactive" as const,
+    title: "Something went wrong",
+    description: "We encountered an error while loading this content",
+    buttonText: "Try Again",
+    secondaryButtonText: "Go Back",
+  },
+  offline: {
+    icon: "bell" as IconTypes,
+    iconState: "inactive" as const,
+    title: "You're offline",
+    description: "Check your internet connection and try again",
+    buttonText: "Retry",
+    secondaryButtonText: "Go Back",
+  },
+  maintenance: {
+    icon: "settings" as IconTypes,
+    iconState: "inactive" as const,
+    title: "Under maintenance",
+    description: "We're making improvements. Please check back later",
+    buttonText: "Check Status",
+    secondaryButtonText: "Go Back",
+  },
+} as const
+
+// Modern Empty State Styles
+const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flex: 1,
+  alignItems: "center",
+  justifyContent: "center",
   paddingHorizontal: spacing.lg,
+  paddingVertical: spacing.xxxl,
 })
-const $content: ThemedStyle<TextStyle> = ({ spacing }) => ({
-  textAlign: "center",
-  paddingHorizontal: spacing.lg,
+
+const $illustrationContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.xl,
+  alignItems: "center",
 })
+
+const $iconContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  width: 80,
+  height: 80,
+  borderRadius: 40,
+  backgroundColor: colors.backgroundSecondary,
+  alignItems: "center",
+  justifyContent: "center",
+  marginBottom: spacing.md,
+})
+
+
+
+const $image: ThemedStyle<ImageStyle> = () => ({
+  width: 120,
+  height: 120,
+})
+
+const $contentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  alignItems: "center",
+  marginBottom: spacing.xl,
+  maxWidth: 300,
+})
+
+const $title: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.sm,
+})
+
+const $description: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.sm,
+})
+
+const $actionsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  alignItems: "center",
+  gap: spacing.md,
+})
+
+const $primaryButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  minWidth: 160,
+  marginBottom: spacing.xs,
+})
+
+const $secondaryButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  minWidth: 140,
+})
+
+/**
+ * Pre-built empty state components for common scenarios
+ */
+export const EmptyStatePresets = {
+  /**
+   * No search results
+   */
+  NoSearchResults: (props: Partial<EmptyStateProps>) => (
+    <EmptyState preset="search" {...props} />
+  ),
+
+  /**
+   * Network error
+   */
+  NetworkError: (props: Partial<EmptyStateProps>) => (
+    <EmptyState preset="error" {...props} />
+  ),
+
+  /**
+   * Offline state
+   */
+  Offline: (props: Partial<EmptyStateProps>) => (
+    <EmptyState preset="offline" {...props} />
+  ),
+
+  /**
+   * Maintenance mode
+   */
+  Maintenance: (props: Partial<EmptyStateProps>) => (
+    <EmptyState preset="maintenance" {...props} />
+  ),
+
+  /**
+   * Generic empty content
+   */
+  EmptyContent: (props: Partial<EmptyStateProps>) => (
+    <EmptyState preset="default" {...props} />
+  ),
+}
