@@ -7,6 +7,8 @@ const hi: Translations = {
     cancel: "रद्द करें",
     back: "वापस",
     logOut: "लॉग आउट",
+    retry: "पुनः प्रयास करें",
+    retryMessage: "कुछ गलत हो गया। क्या आप फिर से कोशिश करना चाहेंगे?",
   },
   welcomeScreen: {
     postscript:
@@ -32,6 +34,31 @@ const hi: Translations = {
 
   errors: {
     invalidEmail: "अमान्य ईमेल पता।",
+  },
+  signUpScreen: {
+    signUp: "साइन अप करें",
+    enterDetails: "हमसे जुड़ें! TabiIgnite के साथ शुरू करने के लिए अपना खाता बनाएं।",
+    emailFieldLabel: "ईमेल",
+    passwordFieldLabel: "पासवर्ड",
+    confirmPasswordFieldLabel: "पासवर्ड की पुष्टि करें",
+    emailFieldPlaceholder: "अपना ईमेल पता दर्ज करें",
+    passwordFieldPlaceholder: "एक मजबूत पासवर्ड बनाएं",
+    confirmPasswordFieldPlaceholder: "अपने पासवर्ड की पुष्टि करें",
+    tapToSignUp: "खाता बनाएं",
+    signingUp: "खाता बना रहे हैं...",
+    alreadyHaveAccount: "क्या आपके पास पहले से खाता है? ",
+    logInLink: "लॉग इन करें",
+  },
+  forgotPasswordScreen: {
+    forgotPassword: "पासवर्ड भूल गए",
+    enterDetails: "अपना ईमेल पता दर्ज करें और हम आपको अपना पासवर्ड रीसेट करने के लिए एक सुरक्षित लिंक भेजेंगे।",
+    emailFieldLabel: "ईमेल",
+    emailFieldPlaceholder: "अपना ईमेल पता दर्ज करें",
+    tapToResetPassword: "रीसेट लिंक भेजें",
+    resettingPassword: "भेज रहे हैं...",
+    successMessage: "पासवर्ड रीसेट लिंक भेज दिया गया! कृपया अपना ईमेल जांचें और निर्देशों का पालन करें।",
+    rememberPassword: "अपना पासवर्ड याद आ गया? ",
+    logInLink: "लॉग इन करें",
   },
   loginScreen: {
     logIn: "लॉग इन करें",

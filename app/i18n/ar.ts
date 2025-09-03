@@ -7,6 +7,8 @@ const ar: Translations = {
     cancel: "حذف",
     back: "خلف",
     logOut: "تسجيل خروج",
+    retry: "إعادة المحاولة",
+    retryMessage: "حدث خطأ ما. هل تريد المحاولة مرة أخرى؟",
   },
   welcomeScreen: {
     postscript:
@@ -33,6 +35,31 @@ const ar: Translations = {
   errors: {
     invalidEmail: "عنوان البريد الالكتروني غير صالح",
   },
+  signUpScreen: {
+    signUp: "إنشاء حساب",
+    enterDetails: "انضم إلينا! أنشئ حسابك للبدء مع TabiIgnite.",
+    emailFieldLabel: "البريد الإلكتروني",
+    passwordFieldLabel: "كلمة المرور",
+    confirmPasswordFieldLabel: "تأكيد كلمة المرور",
+    emailFieldPlaceholder: "أدخل عنوان بريدك الإلكتروني",
+    passwordFieldPlaceholder: "أنشئ كلمة مرور قوية",
+    confirmPasswordFieldPlaceholder: "أكد كلمة المرور",
+    tapToSignUp: "إنشاء حساب",
+    signingUp: "جاري إنشاء الحساب...",
+    alreadyHaveAccount: "لديك حساب بالفعل؟ ",
+    logInLink: "تسجيل الدخول",
+  },
+  forgotPasswordScreen: {
+    forgotPassword: "إعادة تعيين كلمة المرور",
+    enterDetails: "أدخل عنوان بريدك الإلكتروني وسنرسل لك رابطًا آمنًا لإعادة تعيين كلمة المرور.",
+    emailFieldLabel: "البريد الإلكتروني",
+    emailFieldPlaceholder: "أدخل عنوان بريدك الإلكتروني",
+    tapToResetPassword: "إرسال رابط إعادة التعيين",
+    resettingPassword: "جاري الإرسال...",
+    successMessage: "تم إرسال رابط إعادة تعيين كلمة المرور! يرجى التحقق من بريدك الإلكتروني واتباع التعليمات.",
+    rememberPassword: "تذكرت كلمة المرور؟ ",
+    logInLink: "تسجيل الدخول",
+  },
   loginScreen: {
     logIn: "تسجيل الدخول",
     enterDetails:
@@ -43,6 +70,10 @@ const ar: Translations = {
     passwordFieldPlaceholder: "كلمة السر هنا فائقة السر",
     tapToLogIn: "انقر لتسجيل الدخول!",
     hint: "(: تلميح: يمكنك استخدام اي عنوان بريد الكتروني وكلمة السر المفضلة لديك",
+    signUpLink: "إنشاء حساب",
+    separator: " • ",
+    forgotPasswordLink: "نسيت كلمة المرور؟",
+    loggingIn: "جاري تسجيل الدخول...",
   },
   demoNavigator: {
     componentsTab: "عناصر",

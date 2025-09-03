@@ -7,6 +7,8 @@ const es: Translations = {
     cancel: "Cancelar",
     back: "Volver",
     logOut: "Cerrar sesión",
+    retry: "Reintentar",
+    retryMessage: "Algo salió mal. ¿Te gustaría intentar de nuevo?",
   },
   welcomeScreen: {
     postscript:

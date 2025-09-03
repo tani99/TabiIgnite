@@ -7,6 +7,8 @@ const fr: Translations = {
     cancel: "Annuler",
     back: "Retour",
     logOut: "Déconnexion",
+    retry: "Réessayer",
+    retryMessage: "Quelque chose s'est mal passé. Voulez-vous réessayer ?",
   },
   welcomeScreen: {
     postscript:
@@ -34,6 +36,31 @@ const fr: Translations = {
   errors: {
     invalidEmail: "Adresse e-mail invalide.",
   },
+  signUpScreen: {
+    signUp: "S'inscrire",
+    enterDetails: "Rejoignez-nous ! Créez votre compte pour commencer avec TabiIgnite.",
+    emailFieldLabel: "E-mail",
+    passwordFieldLabel: "Mot de passe",
+    confirmPasswordFieldLabel: "Confirmer le mot de passe",
+    emailFieldPlaceholder: "Entrez votre adresse e-mail",
+    passwordFieldPlaceholder: "Créez un mot de passe fort",
+    confirmPasswordFieldPlaceholder: "Confirmez votre mot de passe",
+    tapToSignUp: "Créer un compte",
+    signingUp: "Création du compte...",
+    alreadyHaveAccount: "Vous avez déjà un compte ? ",
+    logInLink: "Se connecter",
+  },
+  forgotPasswordScreen: {
+    forgotPassword: "Mot de passe oublié",
+    enterDetails: "Entrez votre adresse e-mail et nous vous enverrons un lien sécurisé pour réinitialiser votre mot de passe.",
+    emailFieldLabel: "E-mail",
+    emailFieldPlaceholder: "Entrez votre adresse e-mail",
+    tapToResetPassword: "Envoyer le lien de réinitialisation",
+    resettingPassword: "Envoi en cours...",
+    successMessage: "Lien de réinitialisation du mot de passe envoyé ! Veuillez vérifier votre e-mail et suivre les instructions.",
+    rememberPassword: "Vous vous souvenez de votre mot de passe ? ",
+    logInLink: "Se connecter",
+  },
   loginScreen: {
     logIn: "Se connecter",
     enterDetails:
@@ -44,6 +71,10 @@ const fr: Translations = {
     passwordFieldPlaceholder: "Mot de passe super secret ici",
     tapToLogIn: "Appuyez pour vous connecter!",
     hint: "Astuce : vous pouvez utiliser n'importe quelle adresse e-mail et votre mot de passe préféré :)",
+    signUpLink: "S'inscrire",
+    separator: " • ",
+    forgotPasswordLink: "Mot de passe oublié ?",
+    loggingIn: "Connexion en cours...",
   },
   demoNavigator: {
     componentsTab: "Composants",
