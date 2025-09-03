@@ -10,6 +10,7 @@ import { useAuth } from "@/context/AuthContext"
 import type { AppStackScreenProps } from "@/navigators/AppNavigator"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
+import { getErrorMessageForDisplay } from "@/utils/firebaseErrorHandler"
 
 interface ForgotPasswordScreenProps extends AppStackScreenProps<"ForgotPassword"> {}
 
@@ -56,18 +57,8 @@ export const ForgotPasswordScreen: FC<ForgotPasswordScreenProps> = () => {
       setIsLoading(false)
       // Don't reset isSubmitted on Firebase errors - keep it true to show the error
 
-      // Handle Firebase auth errors
-      if (error.code === "auth/user-not-found") {
-        setFirebaseError("No account found with this email address")
-      } else if (error.code === "auth/invalid-email") {
-        setFirebaseError("Invalid email address")
-      } else if (error.code === "auth/network-request-failed") {
-        setFirebaseError("Network error. Please check your connection")
-      } else if (error.code === "auth/too-many-requests") {
-        setFirebaseError("Too many requests. Please try again later")
-      } else {
-        setFirebaseError("Password reset failed. Please try again")
-      }
+      // Handle Firebase auth errors using centralized error handler
+      setFirebaseError(getErrorMessageForDisplay(error.code))
     }
   }
 

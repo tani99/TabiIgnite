@@ -1,6 +1,6 @@
 import { ComponentType, FC, useMemo, useRef, useState } from "react"
 // eslint-disable-next-line no-restricted-imports
-import { TextInput, TextStyle, ViewStyle } from "react-native"
+import { TextInput, TextStyle, View, ViewStyle } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 
 import { Button } from "@/components/Button"
@@ -8,6 +8,7 @@ import { PressableIcon } from "@/components/Icon"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { TextField, type TextFieldAccessoryProps } from "@/components/TextField"
+import { ThemeSwitcher } from "@/components/ThemeSwitcher"
 import { useAuth } from "@/context/AuthContext"
 import type { AppStackScreenProps } from "@/navigators/AppNavigator"
 import { useAppTheme } from "@/theme/context"
@@ -38,15 +39,15 @@ export const SignUpScreen: FC<SignUpScreenProps> = () => {
 
   const confirmPasswordError = useMemo(() => {
     if (!isSubmitted) return ""
-    if (!authConfirmPassword) return "can't be blank"
-    if (authConfirmPassword !== authPassword) return "passwords don't match"
+    if (!authConfirmPassword) return "Please confirm your password"
+    if (authConfirmPassword !== authPassword) return "Passwords do not match"
     return ""
   }, [isSubmitted, authConfirmPassword, authPassword])
 
   const passwordValidationError = useMemo(() => {
     if (!isSubmitted) return ""
-    if (!authPassword) return "can't be blank"
-    if (authPassword.length < 6) return "must be at least 6 characters"
+    if (!authPassword) return "Password is required"
+    if (authPassword.length < 6) return "Password must be at least 6 characters"
     return ""
   }, [isSubmitted, authPassword])
 
@@ -126,6 +127,12 @@ export const SignUpScreen: FC<SignUpScreenProps> = () => {
         style={themed($signUp)}
       />
       <Text tx="signUpScreen:enterDetails" preset="subheading" style={themed($enterDetails)} />
+      
+      {/* Theme Switcher */}
+      <View style={themed($themeSwitcherContainer)}>
+        <Text style={themed($themeSwitcherLabel)} preset="formLabel" text="Theme:" />
+        <ThemeSwitcher />
+      </View>
 
       <TextField
         value={authEmail}
@@ -264,4 +271,13 @@ const $link: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.tint,
   textDecorationLine: "underline",
   marginLeft: 4,
+})
+
+const $themeSwitcherContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.lg,
+  alignItems: "center",
+})
+
+const $themeSwitcherLabel: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  marginBottom: spacing.sm,
 })

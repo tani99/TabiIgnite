@@ -35,7 +35,7 @@ export const getFirebaseErrorMessage = (errorCode: string): FirebaseErrorInfo =>
     case "auth/weak-password":
       return {
         message: "Password is too weak",
-        userAction: "Use at least 6 characters with a mix of letters, numbers, and symbols",
+        userAction: "Please use at least 6 characters with a mix of letters, numbers, and symbols",
         retryable: false,
         code: errorCode,
       }
@@ -43,7 +43,7 @@ export const getFirebaseErrorMessage = (errorCode: string): FirebaseErrorInfo =>
     case "auth/email-already-in-use":
       return {
         message: "An account with this email already exists",
-        userAction: "Please sign in instead or use a different email",
+        userAction: "Please sign in instead or use a different email address",
         retryable: false,
         code: errorCode,
       }
@@ -67,7 +67,7 @@ export const getFirebaseErrorMessage = (errorCode: string): FirebaseErrorInfo =>
     case "auth/user-disabled":
       return {
         message: "This account has been disabled",
-        userAction: "Please contact support for assistance",
+        userAction: "Please contact our support team for assistance",
         retryable: false,
         code: errorCode,
       }
@@ -75,7 +75,7 @@ export const getFirebaseErrorMessage = (errorCode: string): FirebaseErrorInfo =>
     case "auth/operation-not-allowed":
       return {
         message: "This operation is not allowed",
-        userAction: "Please contact support for assistance",
+        userAction: "Please contact our support team for assistance",
         retryable: false,
         code: errorCode,
       }
@@ -83,7 +83,7 @@ export const getFirebaseErrorMessage = (errorCode: string): FirebaseErrorInfo =>
     case "auth/invalid-credential":
       return {
         message: "Invalid credentials",
-        userAction: "Please check your email and password",
+        userAction: "Please check your email and password and try again",
         retryable: true,
         code: errorCode,
       }
@@ -91,7 +91,7 @@ export const getFirebaseErrorMessage = (errorCode: string): FirebaseErrorInfo =>
     case "auth/account-exists-with-different-credential":
       return {
         message: "Account exists with different sign-in method",
-        userAction: "Please try signing in with the original method",
+        userAction: "Please try signing in with the original method you used",
         retryable: false,
         code: errorCode,
       }
@@ -99,7 +99,7 @@ export const getFirebaseErrorMessage = (errorCode: string): FirebaseErrorInfo =>
     case "auth/requires-recent-login":
       return {
         message: "Recent login required",
-        userAction: "Please sign in again to continue",
+        userAction: "Please sign in again to continue with this action",
         retryable: true,
         code: errorCode,
       }
@@ -107,7 +107,7 @@ export const getFirebaseErrorMessage = (errorCode: string): FirebaseErrorInfo =>
     case "auth/credential-already-in-use":
       return {
         message: "These credentials are already in use",
-        userAction: "Please use different credentials",
+        userAction: "Please use different credentials or contact support",
         retryable: false,
         code: errorCode,
       }
@@ -123,7 +123,7 @@ export const getFirebaseErrorMessage = (errorCode: string): FirebaseErrorInfo =>
     case "auth/quota-exceeded":
       return {
         message: "Service quota exceeded",
-        userAction: "Please try again later or contact support",
+        userAction: "Please try again later or contact our support team",
         retryable: true,
         code: errorCode,
       }
@@ -131,7 +131,7 @@ export const getFirebaseErrorMessage = (errorCode: string): FirebaseErrorInfo =>
     case "auth/app-not-authorized":
       return {
         message: "App not authorized",
-        userAction: "Please contact support for assistance",
+        userAction: "Please contact our support team for assistance",
         retryable: false,
         code: errorCode,
       }
@@ -155,7 +155,7 @@ export const getFirebaseErrorMessage = (errorCode: string): FirebaseErrorInfo =>
     case "auth/missing-verification-code":
       return {
         message: "Verification code is missing",
-        userAction: "Please enter the verification code",
+        userAction: "Please enter the verification code you received",
         retryable: false,
         code: errorCode,
       }
@@ -172,7 +172,7 @@ export const getFirebaseErrorMessage = (errorCode: string): FirebaseErrorInfo =>
     default:
       return {
         message: "An unexpected error occurred",
-        userAction: "Please try again or contact support if the problem persists",
+        userAction: "Please try again or contact our support team if the problem persists",
         retryable: true,
         code: errorCode,
       }

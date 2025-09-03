@@ -97,9 +97,9 @@ export const AuthProvider: FC<PropsWithChildren<AuthProviderProps>> = ({ childre
   }, [])
 
   const validationError = useMemo(() => {
-    if (!authEmail || authEmail.length === 0) return "can't be blank"
-    if (authEmail.length < 6) return "must be at least 6 characters"
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(authEmail)) return "must be a valid email address"
+    if (!authEmail || authEmail.length === 0) return "Email is required"
+    if (authEmail.length < 6) return "Email must be at least 6 characters"
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(authEmail)) return "Please enter a valid email address"
     return ""
   }, [authEmail])
 
