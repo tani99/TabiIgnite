@@ -83,6 +83,10 @@ npm-debug.*
 *.orig.*
 web-build/
 
+# Firebase Configuration Files (contain sensitive API keys)
+google-services.json
+GoogleService-Info.plist
+
 # Configurations
 !env.js
 
