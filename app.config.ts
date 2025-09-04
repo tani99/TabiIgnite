@@ -39,6 +39,13 @@ module.exports = ({ config }: ConfigContext): Partial<ExpoConfig> => {
       require("./plugins/withSplashScreen").withSplashScreen,
       // Firebase is configured using the web SDK in app/config/firebase.ts
       // No additional plugin configuration needed
+      [
+        "expo-image-picker",
+        {
+          photosPermission: "The app accesses your photos to let you share them.",
+          cameraPermission: "The app accesses your camera to let you take photos."
+        }
+      ]
     ],
   }
 }

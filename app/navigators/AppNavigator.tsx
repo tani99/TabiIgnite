@@ -55,11 +55,16 @@ export type AppStackScreenProps<T extends keyof AppStackParamList> = NativeStack
 const Stack = createNativeStackNavigator<AppStackParamList>()
 
 const AppStack = () => {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isLoading } = useAuth()
 
   const {
     theme: { colors },
   } = useAppTheme()
+
+  // Show loading state while auth is initializing
+  if (isLoading) {
+    return null
+  }
 
   return (
     <Stack.Navigator
